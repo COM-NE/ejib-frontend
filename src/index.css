@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: PretendardVariable;
+  src:
+    local("PretendardVariable"),
+    url("/font/PretendardVariable.woff2") format("woff");
+  font-display: swap;
+}
