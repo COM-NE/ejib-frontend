@@ -5,14 +5,13 @@ import {
 } from "react-router-dom";
 import PublicLayout from "./layouts/public-layout";
 import ProtectedLayout from "./layouts/protected-layout";
+import LoginPage from "./pages/login-page";
 
 const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <PublicLayout />,
-    children: [
-      // { path: "login", element: <LogIn /> },
-    ],
+    children: [{ path: "login", element: <LoginPage /> }],
   },
 ];
 
