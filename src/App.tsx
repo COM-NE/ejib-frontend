@@ -6,6 +6,7 @@ import {
 import PublicLayout from "./layouts/public-layout";
 import ProtectedLayout from "./layouts/protected-layout";
 import LoginPage from "./pages/login-page";
+import NicknamePage from "./pages/onboarding/nickname-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -19,9 +20,7 @@ const protectedRoutes: RouteObject[] = [
   {
     path: "/",
     element: <ProtectedLayout />,
-    children: [
-      // { index: true, element: <Home /> },
-    ],
+    children: [{ path: "register/nickname", element: <NicknamePage /> }],
   },
 ];
 

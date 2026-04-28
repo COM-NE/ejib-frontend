@@ -16,7 +16,7 @@ const BottomButton = ({ buttons }: BottomButtonProps) => {
     disabled?: boolean,
   ) => {
     if (disabled) {
-      return "bg-[#F5F5F5] text-[#B0B0B0] cursor-not-allowed";
+      return "bg-[#DEE4EB] text-[#ABABAB] cursor-not-allowed";
     }
 
     switch (variant) {
@@ -24,11 +24,11 @@ const BottomButton = ({ buttons }: BottomButtonProps) => {
         return "bg-[#FEE500] text-[#111111] hover:bg-[#FFE812]";
 
       case "outline":
-        return "bg-white text-[#5865FF] border border-[#5865FF] hover:bg-[#F6F7FF]";
+        return "bg-white text-[#5060FE] border border-[#5060FE] hover:bg-[#F6F7FF]";
 
       case "primary":
       default:
-        return "bg-[#5865FF] text-white hover:brightness-95";
+        return "bg-[#5060FE] text-white hover:brightness-95";
     }
   };
 
