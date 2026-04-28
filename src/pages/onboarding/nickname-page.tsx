@@ -21,6 +21,8 @@ export default function NicknamePage() {
   const handleNext = () => {
     setHasSubmitted(true);
     if (!nicknameIsValid) return;
+
+    localStorage.setItem("nickname", nickname.trim());
     navigate("/register/profile");
   };
 
