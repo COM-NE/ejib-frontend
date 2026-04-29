@@ -1,6 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
+import { useOnboardingStore } from "../../store/onboardingStore";
+import type { RequirementType } from "../../types/user";
 
 import waterIcon from "../../assets/onboarding/water-pressure.svg";
 import cleanlinessIcon from "../../assets/onboarding/cleanliness.svg";
@@ -15,7 +17,11 @@ import safetyIcon from "../../assets/onboarding/safety.svg";
 import cctvIcon from "../../assets/onboarding/cctv.svg";
 import landlordIcon from "../../assets/onboarding/landlord.svg";
 
-const requirementOptions = [
+const requirementOptions: Array<{
+  id: RequirementType;
+  label: string;
+  icon: string;
+}> = [
   { id: "water", label: "수압 및 배수", icon: waterIcon },
   { id: "cleanliness", label: "청결도", icon: cleanlinessIcon },
   { id: "option", label: "옵션", icon: optionIcon },
@@ -32,9 +38,10 @@ const requirementOptions = [
 
 export default function RequirementPage() {
   const navigate = useNavigate();
-  const [selectedRequirements, setSelectedRequirements] = useState<string[]>(
-    [],
+  const selectedRequirements = useOnboardingStore(
+    (state) => state.requirements,
   );
+  const setRequirements = useOnboardingStore((state) => state.setRequirements);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -44,21 +51,20 @@ export default function RequirementPage() {
     };
   }, []);
 
-  const handleSelect = (id: string) => {
+  const handleSelect = (id: RequirementType) => {
     if (selectedRequirements.includes(id)) {
-      setSelectedRequirements((prev) => prev.filter((item) => item !== id));
+      setRequirements(selectedRequirements.filter((item) => item !== id));
       return;
     }
 
     if (selectedRequirements.length >= 3) return;
 
-    setSelectedRequirements((prev) => [...prev, id]);
+    setRequirements([...selectedRequirements, id]);
   };
 
   const handleNext = () => {
     if (selectedRequirements.length < 1) return;
 
-    localStorage.setItem("requirements", JSON.stringify(selectedRequirements));
     navigate("/home");
   };
 

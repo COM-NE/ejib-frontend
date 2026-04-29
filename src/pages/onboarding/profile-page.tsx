@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
+import { useOnboardingStore } from "../../store/onboardingStore";
 
 import zibiblue from "../../assets/onboarding/zibi-blue.png";
 import zibired from "../../assets/onboarding/zibi-red.png";
@@ -8,17 +9,17 @@ import zibiyellow from "../../assets/onboarding/zibi-yellow.png";
 
 const profileOptions = [
   {
-    id: "blue",
+    id: "blue" as const,
     image: zibiblue,
     alt: "파란 지비",
   },
   {
-    id: "red",
+    id: "red" as const,
     image: zibired,
     alt: "빨간 지비",
   },
   {
-    id: "yellow",
+    id: "yellow" as const,
     image: zibiyellow,
     alt: "노란 지비",
   },
@@ -26,11 +27,13 @@ const profileOptions = [
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const [selectedProfile, setSelectedProfile] = useState(profileOptions[0]);
-  const [nickname] = useState<string>(() => {
-    // 이 함수는 컴포넌트가 처음 생성될 때 딱 한 번만 실행됩니다.
-    return localStorage.getItem("nickname") ?? "";
-  });
+  const nickname = useOnboardingStore((state) => state.nickname);
+  const profileImage = useOnboardingStore((state) => state.profileImage);
+  const setProfileImage = useOnboardingStore((state) => state.setProfileImage);
+
+  const defaultProfile =
+    profileOptions.find((p) => p.id === profileImage) || profileOptions[0];
+  const [selectedProfile, setSelectedProfile] = useState(defaultProfile);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -40,9 +43,7 @@ export default function ProfilePage() {
   }, []);
 
   const handleNext = () => {
-    localStorage.setItem("profileImage", selectedProfile.id);
-
-    // 다음 페이지 경로에 맞게 수정하면 됨
+    setProfileImage(selectedProfile.id);
     navigate("/register/status");
   };
 

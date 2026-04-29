@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
+import { useOnboardingStore } from "../../store/onboardingStore";
 
 export default function NicknamePage() {
   const navigate = useNavigate();
-  const [nickname, setNickname] = useState("");
+  const nickname = useOnboardingStore((state) => state.nickname);
+  const setNickname = useOnboardingStore((state) => state.setNickname);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -22,7 +24,7 @@ export default function NicknamePage() {
     setHasSubmitted(true);
     if (!nicknameIsValid) return;
 
-    localStorage.setItem("nickname", nickname.trim());
+    setNickname(nickname.trim());
     navigate("/register/profile");
   };
 

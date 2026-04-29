@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
+import { useOnboardingStore } from "../../store/onboardingStore";
+import type { UserStatusType } from "../../types/user";
 
-const statusOptions = [
+const statusOptions: Array<{ id: UserStatusType; label: string }> = [
   {
     id: "student",
     label: "대학생",
@@ -23,11 +25,11 @@ const statusOptions = [
 
 export default function StatusPage() {
   const navigate = useNavigate();
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const selectedStatus = useOnboardingStore((state) => state.userStatus);
+  const setUserStatus = useOnboardingStore((state) => state.setUserStatus);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
-
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -36,7 +38,6 @@ export default function StatusPage() {
   const handleNext = () => {
     if (!selectedStatus) return;
 
-    localStorage.setItem("userStatus", selectedStatus);
     navigate("/register/requirement");
   };
 
@@ -57,7 +58,7 @@ export default function StatusPage() {
             <button
               key={option.id}
               type="button"
-              onClick={() => setSelectedStatus(option.id)}
+              onClick={() => setUserStatus(option.id)}
               className={`
                 h-16 rounded-[20px] border bg-white
                 flex items-center justify-center
