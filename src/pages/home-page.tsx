@@ -203,17 +203,17 @@ function ReviewCard({ review, onClick }: ReviewCardProps) {
 
       <div className="p-4">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-gray-700">
+          <span className="text-xs font-[PretendardVariable] font-medium text-gray-700">
             {review.roomType}
           </span>
 
-          <span className="flex items-center gap-1 rounded-full bg-[#EAF3FF] px-2 py-1 text-[11px] font-semibold text-[#2F80ED]">
+          <span className="flex items-center gap-1 rounded-full bg-[#EAF3FF] px-2 py-1 text-[11px] font-[PretendardVariable] font-medium text-[#2F80ED]">
             <img src={verifiedIcon} alt="실거주 인증" className="h-3.5 w-3.5" />
             실거주 인증
           </span>
         </div>
 
-        <h4 className="mt-3 line-clamp-2 text-sm font-[PretendardVariable] font-bold leading-snug text-gray-900">
+        <h4 className="mt-3 line-clamp-2 font-[PretendardVariable] font-semibold leading-snug text-gray-900">
           {review.title}
         </h4>
 

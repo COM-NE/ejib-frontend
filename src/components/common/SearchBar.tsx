@@ -29,7 +29,7 @@ export default function SearchBar({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="w-full bg-transparent text-sm text-gray-900 outline-none placeholder:text-gray-400"
+        className="w-full bg-transparent font-[PretendardVariable] text-sm text-gray-900 outline-none placeholder:text-gray-400"
       />
     </form>
   );
