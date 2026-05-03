@@ -114,7 +114,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-40 bg-white px-5 pb-5 pt-6">
+      <header className="sticky top-0 z-40 bg-white px-5 pb-8 pt-6">
         <SearchBar
           value={keyword}
           onChange={setKeyword}
