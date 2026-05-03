@@ -11,6 +11,7 @@ import ProfilePage from "./pages/onboarding/profile-page";
 import StatusPage from "./pages/onboarding/status-page";
 import RequirementPage from "./pages/onboarding/requirement-page";
 import HomePage from "./pages/home-page";
+import SearchPage from "./pages/search-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -19,6 +20,7 @@ const publicRoutes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
+      { path: "search", element: <SearchPage /> },
     ],
   },
 ];
