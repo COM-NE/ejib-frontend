@@ -110,7 +110,7 @@ export default function RequirementPage() {
                 <span
                   className={`
                     h-[32px] text-center text-[clamp(11px,3.2vw,13px)]
-                    font-semibold leading-tight
+                    font-[PretendardVariable] font-semibold leading-tight
                     ${isSelected ? "text-[#5060FE]" : "text-[#222222]"}
                   `}
                 >

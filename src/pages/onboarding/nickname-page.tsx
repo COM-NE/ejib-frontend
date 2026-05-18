@@ -48,7 +48,7 @@ export default function NicknamePage() {
           maxLength={10}
           className={`
             w-full rounded-[16px] border px-4 py-4
-            text-[16px] text-[#111111]
+            font-[PretendardVariable] text-[16px] text-[#111111]
             placeholder:text-[#AEB3B9]
             outline-none transition
             ${
@@ -62,13 +62,13 @@ export default function NicknamePage() {
         <div className="mt-2 flex items-center justify-between">
           <div>
             {hasSubmitted && !nicknameIsValid ? (
-              <p className="text-sm text-[#E05F5F]">
+              <p className="font-[PretendardVariable] text-sm text-[#E05F5F]">
                 닉네임을 입력해야 다음으로 넘어갈 수 있어요.
               </p>
             ) : null}
           </div>
 
-          <p className="text-sm font-medium text-[#AEB3B9]">
+          <p className="font-[PretendardVariable] text-sm font-medium text-[#AEB3B9]">
             {nickname.length}/10
           </p>
         </div>

@@ -10,24 +10,32 @@ import NicknamePage from "./pages/onboarding/nickname-page";
 import ProfilePage from "./pages/onboarding/profile-page";
 import StatusPage from "./pages/onboarding/status-page";
 import RequirementPage from "./pages/onboarding/requirement-page";
+import HomePage from "./pages/home-page";
+import SearchPage from "./pages/search-page";
+import DetailPage from "./pages/detail-page";
 
 const publicRoutes: RouteObject[] = [
   {
     path: "/",
     element: <PublicLayout />,
-    children: [{ path: "login", element: <LoginPage /> }],
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "search", element: <SearchPage /> },
+      { path: "detail", element: <DetailPage /> },
+    ],
   },
 ];
 
 const protectedRoutes: RouteObject[] = [
   {
-    path: "/",
+    path: "/register",
     element: <ProtectedLayout />,
     children: [
-      { path: "register/nickname", element: <NicknamePage /> },
-      { path: "register/profile", element: <ProfilePage /> },
-      { path: "register/status", element: <StatusPage /> },
-      { path: "register/requirement", element: <RequirementPage /> },
+      { path: "nickname", element: <NicknamePage /> },
+      { path: "profile", element: <ProfilePage /> },
+      { path: "status", element: <StatusPage /> },
+      { path: "requirement", element: <RequirementPage /> },
     ],
   },
 ];
