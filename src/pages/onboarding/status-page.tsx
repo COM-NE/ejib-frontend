@@ -62,7 +62,7 @@ export default function StatusPage() {
               className={`
                 h-16 rounded-[20px] border bg-white
                 flex items-center justify-center
-                text-[18px] font-bold text-[#111111]
+                font-[PretendardVariable] text-[18px] font-bold text-[#111111]
                 transition active:scale-[0.98]
                 ${
                   isSelected

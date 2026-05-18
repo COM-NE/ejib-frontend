@@ -67,7 +67,7 @@ export default function ProfilePage() {
         </div>
 
         {/* 닉네임 */}
-        <p className="mt-5 text-[22px] font-bold text-[#111111]">
+        <p className="mt-5 text-[22px] font-[PretendardVariable] font-bold text-[#111111]">
           {nickname || "닉네임"}
         </p>
 
