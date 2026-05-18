@@ -54,7 +54,7 @@ export default function Header(props: HeaderProps) {
         <img src={back} alt="뒤로가기" className="h-6 w-6" />
       </button>
 
-      <h1 className="max-w-[220px] truncate text-base font-semibold text-gray-900">
+      <h1 className="max-w-[220px] truncate text-base font-[PretendardVariable] font-medium text-gray-900">
         {props.title}
       </h1>
 

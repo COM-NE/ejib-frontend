@@ -12,6 +12,7 @@ import StatusPage from "./pages/onboarding/status-page";
 import RequirementPage from "./pages/onboarding/requirement-page";
 import HomePage from "./pages/home-page";
 import SearchPage from "./pages/search-page";
+import DetailPage from "./pages/detail-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -21,6 +22,7 @@ const publicRoutes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
       { path: "search", element: <SearchPage /> },
+      { path: "detail", element: <DetailPage /> },
     ],
   },
 ];
