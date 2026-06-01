@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
 import BottomButton from "../components/common/BottomButton";
@@ -6,6 +7,13 @@ import { getOnboardingData } from "../utils/userStorage";
 import type { AiRecommendationResponse } from "../types/ai";
 import star from "../assets/star.svg";
 import aiIcon from "../assets/ai.svg";
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+declare global {
+  interface Window {
+    kakao: any;
+  }
+}
 
 // 목데이터 
 const MOCK_RESULT: AiRecommendationResponse = {
@@ -24,6 +32,44 @@ export default function AiResultPage() {
   const navigate = useNavigate();
   const { nickname } = getOnboardingData();
   const result = MOCK_RESULT;
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!window.kakao || !mapRef.current) return;
+
+    const { kakao } = window;
+    kakao.maps.load(() => {
+      const container = mapRef.current;
+      const options = {
+        center: new kakao.maps.LatLng(result.latitude, result.longitude),
+        level: 3,
+      };
+
+      const map = new kakao.maps.Map(container, options);
+
+      //핀 매물 이름 커스텀 오버레이
+      const content = `
+        <div style="display: flex; flex-direction: column; align-items: center; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));">
+          <div style="width: 24px; height: 24px; background-color: #5060FE; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+            <div style="width: 8px; height: 8px; background-color: white; border-radius: 50%; transform: rotate(45deg);"></div>
+          </div>
+          <div style="margin-top: 8px; background-color: white; padding: 4px 8px; border-radius: 12px; border: 1px solid #5060FE; font-size: 11px; font-weight: 600; color: #5060FE; white-space: nowrap;">
+            ${result.propertyName}
+          </div>
+        </div>
+      `;
+
+      const position = new kakao.maps.LatLng(result.latitude, result.longitude);
+
+      const customOverlay = new kakao.maps.CustomOverlay({
+        position: position,
+        content: content,
+        yAnchor: 1.1,
+      });
+
+      customOverlay.setMap(map);
+    });
+  }, [result.latitude, result.longitude, result.propertyName]);
 
   const handleReRecommend = () => {
     navigate("/ai");
@@ -34,7 +80,6 @@ export default function AiResultPage() {
       <Header variant="detail" title="AI 추천" showLike={false} />
 
       <main className="flex-1 px-4 pt-4">
-        {/* Greeting */}
         <div className="mb-6">
           <h2 className="text-xl font-bold text-[#1f1f1f]">
             {nickname || "사용자"}님을 위한 매물이에요
@@ -45,8 +90,7 @@ export default function AiResultPage() {
 
         {/* Property Card */}
         <div className="flex flex-col overflow-hidden rounded-xl border border-[#d1d1d1] bg-white shadow-sm">
-          <div className="h-[197px] w-full bg-gray-200">
-             {/* 여기에 지도 */}
+          <div ref={mapRef} className="h-[197px] w-full bg-gray-200">
           </div>
 
           <div className="flex flex-col gap-4 p-4">
