@@ -16,6 +16,7 @@ type HeaderProps =
       isLiked?: boolean;
       onBackClick?: () => void;
       onLikeClick?: () => void;
+      showLike?: boolean;
     };
 
 export default function Header(props: HeaderProps) {
@@ -58,18 +59,22 @@ export default function Header(props: HeaderProps) {
         {props.title}
       </h1>
 
-      <button
-        type="button"
-        onClick={props.onLikeClick}
-        className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100"
-        aria-label="찜하기"
-      >
-        <img
-          src={props.isLiked ? filledHeart : emptyHeart}
-          alt="찜하기"
-          className="h-6 w-6"
-        />
-      </button>
+      {props.showLike !== false ? (
+        <button
+          type="button"
+          onClick={props.onLikeClick}
+          className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100"
+          aria-label="찜하기"
+        >
+          <img
+            src={props.isLiked ? filledHeart : emptyHeart}
+            alt="찜하기"
+            className="h-6 w-6"
+          />
+        </button>
+      ) : (
+        <div className="h-9 w-9" />
+      )}
     </header>
   );
 }
