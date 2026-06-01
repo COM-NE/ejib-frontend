@@ -13,6 +13,8 @@ import RequirementPage from "./pages/onboarding/requirement-page";
 import HomePage from "./pages/home-page";
 import SearchPage from "./pages/search-page";
 import DetailPage from "./pages/detail-page";
+import AiPage from "./pages/ai-page";
+import AiResultPage from "./pages/ai-result-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -23,6 +25,8 @@ const publicRoutes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "search", element: <SearchPage /> },
       { path: "detail", element: <DetailPage /> },
+      { path: "ai", element: <AiPage /> },
+      { path: "ai/result", element: <AiResultPage /> },
     ],
   },
 ];
