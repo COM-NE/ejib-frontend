@@ -129,15 +129,17 @@ export default function AiPage() {
         </div>
       </main>
 
-      <BottomButton
-        buttons={[
-          {
-            text: "추천 받기",
-            onClick: handleSubmit,
-            disabled: !isFormValid,
-          },
-        ]}
-      />
+      <div className="[&>div]:bottom-[90px]">
+        <BottomButton
+          buttons={[
+            {
+              text: "추천 받기",
+              onClick: handleSubmit,
+              disabled: !isFormValid,
+            },
+          ]}
+        />
+      </div>
 
       <BottomNavigation />
     </div>
