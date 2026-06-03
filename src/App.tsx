@@ -13,6 +13,12 @@ import RequirementPage from "./pages/onboarding/requirement-page";
 import HomePage from "./pages/home-page";
 import SearchPage from "./pages/search-page";
 import DetailPage from "./pages/detail-page";
+import AiPage from "./pages/ai-page";
+import AiResultPage from "./pages/ai-result-page";
+import ReviewPropertySelectPage from "./pages/review/property-select-page";
+import OcrCertificationPage from "./pages/review/ocr-certification-page";
+import OcrSuccessPage from "./pages/review/ocr-success-page";
+import ReviewContractPage from "./pages/review/review-contract-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -23,6 +29,12 @@ const publicRoutes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "search", element: <SearchPage /> },
       { path: "detail", element: <DetailPage /> },
+      { path: "ai", element: <AiPage /> },
+      { path: "ai/result", element: <AiResultPage /> },
+      { path: "reviews/select", element: <ReviewPropertySelectPage /> },
+      { path: "reviews/ocr", element: <OcrCertificationPage /> },
+      { path: "reviews/ocr/success", element: <OcrSuccessPage /> },
+      { path: "reviews/contract", element: <ReviewContractPage /> },
     ],
   },
 ];
