@@ -1,9 +1,17 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import BottomButton from "../../components/common/BottomButton";
 import doneIcon from "../../assets/done.svg";
 
 export default function OcrSuccessPage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate("/reviews/contract");
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-white px-4">
@@ -24,17 +32,6 @@ export default function OcrSuccessPage() {
           </p>
         </div>
       </div>
-
-      {/* 하단 버튼 */}
-      <BottomButton
-        buttons={[
-          {
-            text: "확인",
-            onClick: () => navigate("/"),
-            variant: "primary",
-          },
-        ]}
-      />
     </div>
   );
 }
