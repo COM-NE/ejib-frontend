@@ -17,6 +17,12 @@ type HeaderProps =
       onBackClick?: () => void;
       onLikeClick?: () => void;
       showLike?: boolean;
+    }
+  | {
+      variant: "page";
+      title: string;
+      showBack?: boolean;
+      onBackClick?: () => void;
     };
 
 export default function Header(props: HeaderProps) {
@@ -40,6 +46,27 @@ export default function Header(props: HeaderProps) {
         >
           <img src={bell} alt="알림" className="h-6 w-6" />
         </button>
+      </header>
+    );
+  }
+
+  if (props.variant === "page") {
+    return (
+      <header className={`${baseStyle} relative justify-center`}>
+        {props.showBack ? (
+          <button
+            type="button"
+            onClick={props.onBackClick ?? (() => navigate(-1))}
+            className="absolute left-5 flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100"
+            aria-label="뒤로가기"
+          >
+            <img src={back} alt="뒤로가기" className="h-6 w-6" />
+          </button>
+        ) : null}
+
+        <h1 className="text-base font-[PretendardVariable] font-semibold text-gray-900">
+          {props.title}
+        </h1>
       </header>
     );
   }
