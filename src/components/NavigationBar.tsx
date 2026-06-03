@@ -38,7 +38,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "AI추천",
-    path: "/ai-recommend",
+    path: "/ai",
     Icon: RobotIcon,
   },
   {

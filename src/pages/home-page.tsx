@@ -71,7 +71,7 @@ const quickMenus = [
   {
     title: "AI매물추천",
     icon: aiIcon,
-    path: "/ai-recommend",
+    path: "/ai",
   },
   {
     title: "찜리스트",
