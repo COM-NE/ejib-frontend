@@ -43,7 +43,7 @@ export default function ReviewPropertySelectPage() {
     if (reviewType === "resident") {
       navigate("/reviews/ocr");
     } else {
-      navigate("/reviews/write"); // 임장 후기 작성 페이지 (추후 구현)
+      navigate("/reviews/contract");
     }
   };
 
