@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import NavigationBar from "../../components/NavigationBar";
 import BottomButton from "../../components/common/BottomButton";
@@ -7,7 +6,6 @@ import Dropdown from "../../components/common/Dropdown";
 import Input from "../../components/common/Input";
 
 export default function ReviewContractPage() {
-  const navigate = useNavigate();
   const [leaseType, setLeaseType] = useState("");
   const [deposit, setDeposit] = useState("");
   const [monthlyRent, setMonthlyRent] = useState("");
