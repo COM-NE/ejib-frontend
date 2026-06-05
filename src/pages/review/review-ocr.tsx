@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AiLoadingPage from "../ai-loading-page";
 import Modal from "../../components/common/Modal";
 
-export default function OcrCertificationPage() {
+export default function ReviewOcrPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);

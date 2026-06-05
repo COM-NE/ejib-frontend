@@ -23,7 +23,7 @@ const MOCK_PROPERTIES = [
   },
 ];
 
-export default function ReviewPropertySelectPage() {
+export default function ReviewSelectPage() {
   const navigate = useNavigate();
   const { selectedProperty, reviewType, setSelectedProperty, setReviewType } = useReviewStore();
   const [searchQuery, setSearchQuery] = useState(selectedProperty?.name || "");

@@ -55,7 +55,7 @@ const StarRating = ({
   </div>
 );
 
-export default function WriteReviewPage() {
+export default function ReviewWritePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);

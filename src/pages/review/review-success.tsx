@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import doneIcon from "../../assets/done.svg";
 
-export default function OcrSuccessPage() {
+export default function ReviewSuccessPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
