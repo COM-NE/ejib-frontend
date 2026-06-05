@@ -1,6 +1,14 @@
 import zibiBlue from "../assets/onboarding/zibi-blue.png";
 
-export default function AiLoadingPage() {
+interface AiLoadingPageProps {
+  title?: string;
+  description?: string;
+}
+
+export default function AiLoadingPage({ 
+  title = "원하시는 매물을 찾고있어요", 
+  description = "잠시만 기다려주세요" 
+}: AiLoadingPageProps) {
   return (
     <div className="flex min-h-screen w-full flex-col items-center justify-center bg-white">
       <div className="relative mb-10 flex h-[187px] w-[187px] items-center justify-center">
@@ -40,10 +48,10 @@ export default function AiLoadingPage() {
       {/* Text Content */}
       <div className="flex flex-col items-center gap-1 px-8 text-center">
         <p className="text-xl font-bold text-[#1f1f1f]">
-          원하시는 매물을 찾고있어요
+          {title}
         </p>
         <p className="text-sm font-medium text-[#656565]">
-          잠시만 기다려주세요
+          {description}
         </p>
       </div>
     </div>
