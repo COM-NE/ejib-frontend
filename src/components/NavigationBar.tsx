@@ -33,12 +33,12 @@ const navItems: NavItem[] = [
   },
   {
     label: "후기작성",
-    path: "/reviews/new",
+    path: "/reviews/select",
     Icon: ReviewIcon,
   },
   {
     label: "AI추천",
-    path: "/ai-recommend",
+    path: "/ai",
     Icon: RobotIcon,
   },
   {
