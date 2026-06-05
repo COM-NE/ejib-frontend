@@ -1,21 +1,20 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import NavigationBar from "../../components/NavigationBar";
 import BottomButton from "../../components/common/BottomButton";
 import Dropdown from "../../components/common/Dropdown";
 import Input from "../../components/common/Input";
+import { useReviewStore } from "../../store/reviewStore";
 
 export default function ReviewContractPage() {
-  const [leaseType, setLeaseType] = useState("");
-  const [deposit, setDeposit] = useState("");
-  const [monthlyRent, setMonthlyRent] = useState("");
-  const [maintenanceFee, setMaintenanceFee] = useState("");
+  const navigate = useNavigate();
+  const { contractInfo, setContractInfo } = useReviewStore();
+  const { leaseType, deposit, monthlyRent, maintenanceFee } = contractInfo;
 
   const isNextDisabled = !leaseType || !deposit || !maintenanceFee || (leaseType === "월세" && !monthlyRent);
 
   const handleNext = () => {
-    // 다음 단계로 이동 (추후 구현)
-    // navigate("/reviews/write");
+    navigate("/reviews/write");
   };
 
   return (
@@ -32,7 +31,7 @@ export default function ReviewContractPage() {
           placeholder="전세/월세"
           options={["전세", "월세"]}
           value={leaseType}
-          onChange={setLeaseType}
+          onChange={(val) => setContractInfo({ leaseType: val })}
         />
 
         <div className="flex flex-col gap-4">
@@ -42,7 +41,7 @@ export default function ReviewContractPage() {
             suffix="만원"
             type="number"
             value={deposit}
-            onChange={(e) => setDeposit(e.target.value)}
+            onChange={(e) => setContractInfo({ deposit: e.target.value })}
           />
 
           {leaseType === "월세" && (
@@ -52,7 +51,7 @@ export default function ReviewContractPage() {
               suffix="만원"
               type="number"
               value={monthlyRent}
-              onChange={(e) => setMonthlyRent(e.target.value)}
+              onChange={(e) => setContractInfo({ monthlyRent: e.target.value })}
             />
           )}
 
@@ -62,7 +61,7 @@ export default function ReviewContractPage() {
             suffix="만원"
             type="number"
             value={maintenanceFee}
-            onChange={(e) => setMaintenanceFee(e.target.value)}
+            onChange={(e) => setContractInfo({ maintenanceFee: e.target.value })}
           />
         </div>
       </main>

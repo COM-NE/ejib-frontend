@@ -1,12 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AiLoadingPage from "../ai-loading-page";
 import Modal from "../../components/common/Modal";
 
-export default function OcrCertificationPage() {
+export default function ReviewOcrPage() {
   const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+
+  //카메라
+  useEffect(() => {
+    async function startCamera() {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" }, // 후면 카메라 우선
+          audio: false,
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err) {
+        console.error("카메라를 시작할 수 없습니다:", err);
+      }
+    }
+
+    startCamera();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
 
   const handleCapture = () => {
     setIsLoading(true);
@@ -37,9 +65,16 @@ export default function OcrCertificationPage() {
 
   return (
     <div className="relative flex h-screen w-full flex-col overflow-hidden bg-[#010101]">
-      {/* 카메라 뷰 영역 (전체 배경이 검정색이므로 그대로 유지) */}
+      {/* 카메라 뷰 영역 */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       
-      {/* 상단 텍스트 가이드 */}
+
+      <div className="absolute inset-0 bg-black/40" />
       <div className="absolute top-[91px] left-0 right-0 flex flex-col items-center gap-2 px-4">
         <p className="text-lg font-semibold text-center text-white">
           실거주 인증하기
