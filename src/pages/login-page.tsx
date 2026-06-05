@@ -17,13 +17,15 @@ const KakaoIcon = () => (
 );
 
 export default function LoginPage() {
-  const K_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
-  const K_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI;
-
-  const kakaoURL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${K_REST_API_KEY}&redirect_uri=${K_REDIRECT_URI}&prompt=login`;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleKakaoLogin = () => {
-    window.location.href = kakaoURL;
+    const kakaoAuthorizeUrl = `${API_BASE_URL}/oauth/kakao/authorize`;
+
+    console.log("[카카오 로그인 시작]");
+    console.log("이동할 URL:", kakaoAuthorizeUrl);
+
+    window.location.href = kakaoAuthorizeUrl;
   };
 
   return (

@@ -8,6 +8,7 @@ import PublicLayout from "./layouts/public-layout";
 import ProtectedLayout from "./layouts/protected-layout";
 
 import LoginPage from "./pages/login-page";
+import KakaoSuccessPage from "./pages/kakao-success-page";
 import NicknamePage from "./pages/onboarding/nickname-page";
 import ProfilePage from "./pages/onboarding/profile-page";
 import StatusPage from "./pages/onboarding/status-page";
@@ -31,6 +32,7 @@ const publicRoutes: RouteObject[] = [
     children: [
       { index: true, element: <HomePage /> },
       { path: "login", element: <LoginPage /> },
+      { path: "/oauth/kakao/success", element: <KakaoSuccessPage /> },
       { path: "search", element: <SearchPage /> },
       { path: "detail", element: <DetailPage /> },
       { path: "ai", element: <AiPage /> },
