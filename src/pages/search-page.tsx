@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { searchProperties } from "../api/property";
 import SearchBar from "../components/common/SearchBar";
 import BottomNavigation from "../components/NavigationBar";
 import starIcon from "../assets/star.svg";
@@ -8,7 +9,7 @@ import filledHeartIcon from "../assets/home/filled-heart.svg";
 
 type RentType = "월세" | "전세";
 
-type Property = {
+export type Property = {
   id: number;
   rentType: RentType;
   title: string;
@@ -18,89 +19,42 @@ type Property = {
   isLiked: boolean;
 };
 
-const mockProperties: Property[] = [
-  {
-    id: 1,
-    rentType: "월세",
-    title: "소사역힐스센텀",
-    rating: 4.5,
-    reviewCount: 10,
-    address: "경기도 부천시 소사구 소사본동 123-4",
-    isLiked: false,
-  },
-  {
-    id: 2,
-    rentType: "전세",
-    title: "소사역힐스센텀",
-    rating: 4.5,
-    reviewCount: 10,
-    address: "경기도 부천시 소사구 소사본동 45-7",
-    isLiked: true,
-  },
-  {
-    id: 3,
-    rentType: "월세",
-    title: "소사역힐스센텀",
-    rating: 4.5,
-    reviewCount: 10,
-    address: "주소가 들어갑니다",
-    isLiked: false,
-  },
-  {
-    id: 4,
-    rentType: "월세",
-    title: "역곡역 더하우스",
-    rating: 4.3,
-    reviewCount: 8,
-    address: "경기도 부천시 역곡동",
-    isLiked: false,
-  },
-  {
-    id: 5,
-    rentType: "월세",
-    title: "역곡 자취빌",
-    rating: 4.7,
-    reviewCount: 13,
-    address: "경기도 부천시 역곡로 12",
-    isLiked: false,
-  },
-  {
-    id: 6,
-    rentType: "월세",
-    title: "소사역 원룸타운",
-    rating: 4.2,
-    reviewCount: 6,
-    address: "주소가 들어갑니다",
-    isLiked: false,
-  },
-  {
-    id: 7,
-    rentType: "전세",
-    title: "역곡 스테이하우스",
-    rating: 4.6,
-    reviewCount: 11,
-    address: "경기도 부천시 역곡동 88-2",
-    isLiked: true,
-  },
-];
-
 export default function SearchPage() {
   const navigate = useNavigate();
 
-  const [keyword, setKeyword] = useState("역곡");
-  const [properties, setProperties] = useState(mockProperties);
+  const [keyword, setKeyword] = useState("");
+  const [error, setError] = useState("");
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
-  const filteredProperties = useMemo(() => {
+  const handleSearch = async () => {
     const trimmedKeyword = keyword.trim();
 
-    if (!trimmedKeyword) return properties;
+    if (!trimmedKeyword) return;
 
-    return properties.filter(
-      (property) =>
-        property.title.includes(trimmedKeyword) ||
-        property.address.includes(trimmedKeyword),
-    );
-  }, [keyword, properties]);
+    try {
+      setLoading(true);
+      setError("");
+      setHasSearched(true);
+
+      const result = await searchProperties(trimmedKeyword);
+
+      if (result.length === 0) {
+        setProperties([]);
+        setError("검색 결과가 없습니다.");
+        return;
+      }
+
+      setProperties(result);
+    } catch (err) {
+      console.error(err);
+      setProperties([]);
+      setError("매물 검색 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLikeClick = (propertyId: number) => {
     setProperties((prev) =>
@@ -118,23 +72,39 @@ export default function SearchPage() {
         <SearchBar
           value={keyword}
           onChange={setKeyword}
-          onSubmit={() => {
-            console.log("검색어:", keyword);
-          }}
+          onSubmit={handleSearch}
         />
       </header>
 
       <main className="pb-36">
-        <section>
-          {filteredProperties.map((property) => (
-            <PropertyListItem
-              key={property.id}
-              property={property}
-              onClick={() => navigate(`/properties/${property.id}`)}
-              onLikeClick={() => handleLikeClick(property.id)}
-            />
-          ))}
-        </section>
+        {loading && (
+          <p className="px-5 py-4 text-[15px] text-[#666666]">
+            매물을 검색하는 중입니다...
+          </p>
+        )}
+
+        {!loading && error && (
+          <p className="px-5 py-4 text-[15px] text-red-500">{error}</p>
+        )}
+
+        {!loading && !error && !hasSearched && (
+          <p className="px-5 py-4 text-[15px] text-[#666666]">
+            매물명을 검색해보세요.
+          </p>
+        )}
+
+        {!loading && !error && properties.length > 0 && (
+          <section>
+            {properties.map((property) => (
+              <PropertyListItem
+                key={property.id}
+                property={property}
+                onClick={() => navigate(`/properties/${property.id}`)}
+                onLikeClick={() => handleLikeClick(property.id)}
+              />
+            ))}
+          </section>
+        )}
       </main>
 
       <BottomNavigation />
@@ -183,10 +153,10 @@ function PropertyListItem({
             <img
               src={starIcon}
               alt="별점"
-              className="h-5 w-5 object-contain relative top-[1px]"
+              className="relative top-[1px] h-5 w-5 object-contain"
             />
-            <span className="leading-none mt-1">{property.rating}</span>
-            <span className="leading-none mt-1 ml-2">
+            <span className="mt-1 leading-none">{property.rating}</span>
+            <span className="ml-2 mt-1 leading-none">
               후기 {property.reviewCount}개
             </span>
           </div>
@@ -198,7 +168,10 @@ function PropertyListItem({
 
         <button
           type="button"
-          onClick={onLikeClick}
+          onClick={(e) => {
+            e.stopPropagation();
+            onLikeClick();
+          }}
           aria-label="찜하기"
           className="pt-1 transition active:scale-90"
         >
