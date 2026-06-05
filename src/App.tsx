@@ -3,8 +3,10 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+
 import PublicLayout from "./layouts/public-layout";
 import ProtectedLayout from "./layouts/protected-layout";
+
 import LoginPage from "./pages/login-page";
 import NicknamePage from "./pages/onboarding/nickname-page";
 import ProfilePage from "./pages/onboarding/profile-page";
@@ -20,6 +22,8 @@ import OcrCertificationPage from "./pages/review/ocr-certification-page";
 import OcrSuccessPage from "./pages/review/ocr-success-page";
 import ReviewContractPage from "./pages/review/review-contract-page";
 import WriteReviewPage from "./pages/review/write-review-page";
+import MyPage from "./pages/my-page";
+import MyLikesPage from "./pages/my-likes-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -41,7 +45,7 @@ const publicRoutes: RouteObject[] = [
   },
 ];
 
-const protectedRoutes: RouteObject[] = [
+const registerRoutes: RouteObject[] = [
   {
     path: "/register",
     element: <ProtectedLayout />,
@@ -54,7 +58,21 @@ const protectedRoutes: RouteObject[] = [
   },
 ];
 
-const router = createBrowserRouter([...publicRoutes, ...protectedRoutes]);
+const protectedRoutes: RouteObject[] = [
+  {
+    element: <ProtectedLayout />,
+    children: [
+      { path: "/my", element: <MyPage /> },
+      { path: "/my/likes", element: <MyLikesPage /> },
+    ],
+  },
+];
+
+const router = createBrowserRouter([
+  ...publicRoutes,
+  ...registerRoutes,
+  ...protectedRoutes,
+]);
 
 const App = () => {
   return <RouterProvider router={router} />;
