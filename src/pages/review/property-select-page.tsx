@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import BottomNavigation from "../../components/NavigationBar";
 import BottomButton from "../../components/common/BottomButton";
+import { useReviewStore } from "../../store/reviewStore";
 
 const MOCK_PROPERTIES = [
   {
@@ -24,10 +25,9 @@ const MOCK_PROPERTIES = [
 
 export default function ReviewPropertySelectPage() {
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { selectedProperty, reviewType, setSelectedProperty, setReviewType } = useReviewStore();
+  const [searchQuery, setSearchQuery] = useState(selectedProperty?.name || "");
   const [isFocused, setIsFocused] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<typeof MOCK_PROPERTIES[0] | null>(null);
-  const [reviewType, setReviewType] = useState<"resident" | "inspection" | null>(null);
 
   const filteredProperties = searchQuery
     ? MOCK_PROPERTIES.filter((p) => p.name.includes(searchQuery))
