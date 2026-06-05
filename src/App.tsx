@@ -19,6 +19,7 @@ import ReviewPropertySelectPage from "./pages/review/property-select-page";
 import OcrCertificationPage from "./pages/review/ocr-certification-page";
 import OcrSuccessPage from "./pages/review/ocr-success-page";
 import ReviewContractPage from "./pages/review/review-contract-page";
+import WriteReviewPage from "./pages/review/write-review-page";
 
 const publicRoutes: RouteObject[] = [
   {
@@ -35,6 +36,7 @@ const publicRoutes: RouteObject[] = [
       { path: "reviews/ocr", element: <OcrCertificationPage /> },
       { path: "reviews/ocr/success", element: <OcrSuccessPage /> },
       { path: "reviews/contract", element: <ReviewContractPage /> },
+      { path: "reviews/write", element: <WriteReviewPage /> },
     ],
   },
 ];
