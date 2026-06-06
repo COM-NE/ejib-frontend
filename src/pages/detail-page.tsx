@@ -1,9 +1,15 @@
-import { forwardRef, useState, useEffect, useRef } from "react";
+import { forwardRef, useState, useEffect, useRef, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
 import starIcon from "../assets/star.svg";
 import emptyStarIcon from "../assets/starfit.svg";
 import aiIcon from "../assets/home/ai.svg";
+import {
+  getPropertyDetail,
+  getPropertyImages,
+  type PropertyDetail,
+} from "../api/property";
 
 type ScoreKey = "집상태" | "시설물" | "인프라" | "치안" | "환경";
 
@@ -22,93 +28,147 @@ type Review = {
   scores: Record<ScoreKey, number>;
 };
 
-const detailData = {
+function buildDetailInfo(property: PropertyDetail): DetailInfo[] {
+  return [
+    { label: "매물타입", value: property.propertyType },
+    { label: "거래타입", value: property.transactionType },
+    { label: "가격", value: `${property.monthlyRent}만원` },
+    { label: "보증금", value: `${property.deposit}만원` },
+    { label: "층", value: `지상 ${property.floor}층` },
+    { label: "면적", value: `${property.area}m²` },
+    { label: "부동산", value: property.agency },
+    { label: "가톨릭대까지", value: `${property.distanceToSchool}m` },
+    { label: "주소", value: property.propertyAddress },
+    { label: "기타", value: property.description },
+  ];
+}
+
+function buildScoreData(averageTotalScore: number) {
+  return {
+    총점수: averageTotalScore,
+    집상태: averageTotalScore,
+    시설물: averageTotalScore,
+    인프라: averageTotalScore,
+    치안: averageTotalScore,
+    환경: averageTotalScore,
+  };
+}
+
+const mockReview: Review = {
   id: 1,
-  name: "소사역힐스센텀",
-  addressTitle: "매물 주소가 들어갑니다",
-  address: "경기도 부천시 원미구 지봉로45번길 14",
-  rating: 4.5,
-  reviewCount: 10,
-  aiSummary:
-    "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다.",
-  info: [
-    { label: "매물타입", value: "일반원룸" },
-    { label: "거래타입", value: "월세" },
-    { label: "가격", value: "50만원" },
-    { label: "보증금", value: "500만원" },
-    { label: "층", value: "지상 3층" },
-    { label: "면적", value: "17m²" },
-    { label: "부동산", value: "상상부동산공인중개사사무소" },
-    { label: "가톨릭대까지", value: "160m" },
-    { label: "주소", value: "경기도 부천시 원미구 지봉로45번길 14" },
-    { label: "기타", value: "가톨릭대 정문앞 원룸 월세" },
-  ] satisfies DetailInfo[],
-  photos: [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267d?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560184897-ae75f418493e?w=700&auto=format&fit=crop",
-  ],
-  totalScores: {
-    총점수: 4.0,
+  userName: "사용자이름",
+  period: "3년 이상 거주 / 고층",
+  rating: 4.0,
+  date: "2026년 3월 작성",
+  content:
+    "학교와 가까워 이동이 편했고, 주변 편의시설도 적당히 있어 생활하기 좋았습니다.",
+  scores: {
     집상태: 3.0,
     시설물: 2.0,
     인프라: 5.0,
     치안: 3.0,
     환경: 4.0,
   },
-  review: {
-    id: 1,
-    userName: "사용자이름",
-    period: "3년 이상 거주 / 고층",
-    rating: 4.0,
-    date: "2026년 3월 작성",
-    content:
-      "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다. 학교와 가까워 이동이 편했고, 주변 편의시설도 적당히 있어 생활하기 좋았습니다.",
-    scores: {
-      집상태: 3.0,
-      시설물: 2.0,
-      인프라: 5.0,
-      치안: 3.0,
-      환경: 4.0,
-    },
-  } satisfies Review,
 };
 
-const questions = [
+// const detailData = {
+//   id: 1,
+//   name: "소사역힐스센텀",
+//   addressTitle: "매물 주소가 들어갑니다",
+//   address: "경기도 부천시 원미구 지봉로45번길 14",
+//   rating: 4.5,
+//   reviewCount: 10,
+//   aiSummary:
+//     "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다.",
+//   info: [
+//     { label: "매물타입", value: "일반원룸" },
+//     { label: "거래타입", value: "월세" },
+//     { label: "가격", value: "50만원" },
+//     { label: "보증금", value: "500만원" },
+//     { label: "층", value: "지상 3층" },
+//     { label: "면적", value: "17m²" },
+//     { label: "부동산", value: "상상부동산공인중개사사무소" },
+//     { label: "가톨릭대까지", value: "160m" },
+//     { label: "주소", value: "경기도 부천시 원미구 지봉로45번길 14" },
+//     { label: "기타", value: "가톨릭대 정문앞 원룸 월세" },
+//   ] satisfies DetailInfo[],
+//   photos: [
+//     "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267d?w=700&auto=format&fit=crop",
+//     "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&auto=format&fit=crop",
+//     "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&auto=format&fit=crop",
+//     "https://images.unsplash.com/photo-1560184897-ae75f418493e?w=700&auto=format&fit=crop",
+//   ],
+//   totalScores: {
+//     총점수: 4.0,
+//     집상태: 3.0,
+//     시설물: 2.0,
+//     인프라: 5.0,
+//     치안: 3.0,
+//     환경: 4.0,
+//   },
+//   review: {
+//     id: 1,
+//     userName: "사용자이름",
+//     period: "3년 이상 거주 / 고층",
+//     rating: 4.0,
+//     date: "2026년 3월 작성",
+//     content:
+//       "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다. 학교와 가까워 이동이 편했고, 주변 편의시설도 적당히 있어 생활하기 좋았습니다.",
+//     scores: {
+//       집상태: 3.0,
+//       시설물: 2.0,
+//       인프라: 5.0,
+//       치안: 3.0,
+//       환경: 4.0,
+//     },
+//   } satisfies Review,
+// };
+
+type Question = {
+  id: number;
+  content: string;
+  answers: string[];
+};
+
+const questions: Question[] = [
   {
     id: 1,
     content:
       "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
     answers: [
-      "네 근처에 소사역이 있습니다.",
+      "네, 근처에 소사역이 있습니다.",
       "소사역 앞에 가까운 버스 정류장이 있어요.",
     ],
   },
   {
     id: 2,
-    content:
-      "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
-    answers: ["네 근처에 소사역이 있습니다."],
+    content: "주변 편의시설은 어떤가요? 마트나 약국이 가깝나요?",
+    answers: ["네, 도보 거리에 편의점과 약국이 있습니다."],
   },
   {
     id: 3,
-    content:
-      "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
+    content: "주차 공간은 있나요? 주차 비용은 어떻게 되나요?",
     answers: [],
   },
 ];
 
-const tabs = [
-  { key: "info", label: "정보" },
-  { key: "photo", label: "사진" },
-  { key: "review", label: `리뷰 ${detailData.reviewCount}` },
-  { key: "qa", label: "Q&A" },
-];
+// const tabs = [
+//   { key: "info", label: "정보" },
+//   { key: "photo", label: "사진" },
+//   { key: "review", label: `리뷰 ${detailData.reviewCount}` },
+//   { key: "qa", label: "Q&A" },
+// ];
 
 export default function DetailPage() {
+  const { propertyId } = useParams();
+
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
+
+  const [property, setProperty] = useState<PropertyDetail | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const infoRef = useRef<HTMLElement | null>(null);
   const photoRef = useRef<HTMLElement | null>(null);
@@ -122,12 +182,65 @@ export default function DetailPage() {
     qa: qaRef,
   };
 
+  const tabs = useMemo(
+    () => [
+      { key: "info", label: "정보" },
+      { key: "photo", label: "사진" },
+      { key: "review", label: `리뷰 ${property?.reviewCount ?? 0}` },
+      { key: "qa", label: "Q&A" },
+    ],
+    [property?.reviewCount],
+  );
+
+  const detailInfo = useMemo(() => {
+    if (!property) return [];
+    return buildDetailInfo(property);
+  }, [property]);
+
+  const totalScores = useMemo(() => {
+    return buildScoreData(property?.averageTotalScore ?? 0);
+  }, [property?.averageTotalScore]);
+
+  useEffect(() => {
+    const fetchPropertyDetail = async () => {
+      if (!propertyId) return;
+
+      const numericPropertyId = Number(propertyId);
+
+      if (Number.isNaN(numericPropertyId)) {
+        setError("잘못된 매물 주소입니다.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const [detailData, imageData] = await Promise.all([
+          getPropertyDetail(numericPropertyId),
+          getPropertyImages(numericPropertyId),
+        ]);
+
+        setProperty(detailData);
+        setPhotos(imageData.map((image) => image.imageUrl));
+      } catch (err) {
+        console.error(err);
+        setError("매물 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyDetail();
+  }, [propertyId]);
+
   const handleTapClick = (key: string) => {
     setActiveTab(key);
 
     const targetRef = sectionRefs[key as keyof typeof sectionRefs].current;
+
     if (targetRef) {
-      // 탭 고정 높이(48px) + 헤더 고정 높이(56px) = 104px 만큼 여백을 두고 스크롤
       const elementPosition = targetRef.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - 104;
 
@@ -138,12 +251,10 @@ export default function DetailPage() {
     }
   };
 
-  // 스크롤 위치 감지하여 현재 보고 있는 섹션의 탭 활성화하기
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 110; // 여유 오차 바이어스 추가
+      const scrollPosition = window.scrollY + 110;
 
-      // const infoTop = infoRef.current?.offsetTop ?? 0;
       const photoTop = photoRef.current?.offsetTop ?? 0;
       const reviewTop = reviewRef.current?.offsetTop ?? 0;
       const qaTop = qaRef.current?.offsetTop ?? 0;
@@ -163,31 +274,55 @@ export default function DetailPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9]">
+        <p className="font-[PretendardVariable] text-sm text-[#666666]">
+          매물 정보를 불러오는 중입니다...
+        </p>
+      </div>
+    );
+  }
+
+  if (error || !property) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9] px-5">
+        <p className="font-[PretendardVariable] text-sm text-red-500">
+          {error || "매물 정보가 없습니다."}
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#F6F7F9] w-full max-w-full">
-      {/* 상단 고정 헤더 */}
+    <div className="min-h-screen w-full max-w-full bg-[#F6F7F9]">
       <div className="sticky top-0 z-50 bg-white">
         <Header
           variant="detail"
-          title={detailData.name}
+          title={property.propertyName}
           isLiked={isLiked}
           onLikeClick={() => setIsLiked((prev) => !prev)}
         />
       </div>
 
-      {/* main 태그 내 overflow-x-hidden 삭제 (sticky 무력화 원인 방지) */}
       <main className="pb-36">
         <section className="bg-white px-5 pb-6 pt-5">
           <h2 className="font-[PretendardVariable] text-xl font-semibold text-[#111111]">
-            {detailData.addressTitle}
+            {property.propertyName}
           </h2>
+
+          <p className="mt-2 font-[PretendardVariable] text-sm text-[#666666]">
+            {property.propertyAddress}
+          </p>
 
           <div className="mt-3 flex items-center gap-2 font-[PretendardVariable] text-base text-[#222222]">
             <img src={starIcon} alt="별점" className="h-5 w-5" />
+
             <span className="font-[PretendardVariable] font-medium">
-              {detailData.rating}
+              {property.averageTotalScore.toFixed(1)}
             </span>
-            <span>후기 {detailData.reviewCount}개</span>
+
+            <span>후기 {property.reviewCount}개</span>
           </div>
 
           <div className="mt-2 flex items-center gap-2 font-[PretendardVariable] text-base font-medium text-[#333333]">
@@ -196,11 +331,10 @@ export default function DetailPage() {
           </div>
 
           <p className="mt-2 font-[PretendardVariable] text-sm leading-relaxed text-[#444444]">
-            {detailData.aiSummary}
+            {property.description || "아직 등록된 설명이 없습니다."}
           </p>
         </section>
 
-        {/* 따라다니는 스티키 내비게이션 바 */}
         <nav className="sticky top-[56px] z-40 grid grid-cols-4 border-b border-[#E1E4EA] bg-white shadow-sm">
           {tabs.map((tab) => {
             const active = activeTab === tab.key;
@@ -224,11 +358,24 @@ export default function DetailPage() {
           })}
         </nav>
 
-        {/* 각 섹션 컴포넌트 */}
-        <InfoSection ref={infoRef} info={detailData.info} />
-        <PhotoSection ref={photoRef} photos={detailData.photos} />
-        <ScoreSection ref={reviewRef} scores={detailData.totalScores} />
-        <ReviewSection review={detailData.review} />
+        <InfoSection ref={infoRef} info={detailInfo} />
+        <PhotoSection ref={photoRef} photos={photos} />
+        <ScoreSection ref={reviewRef} scores={totalScores} />
+
+        {property.reviewCount > 0 ? (
+          <ReviewSection review={mockReview} />
+        ) : (
+          <section className="mt-3 bg-white px-5 py-7">
+            <h3 className="font-[PretendardVariable] text-lg font-medium text-[#111111]">
+              이집 리뷰
+            </h3>
+
+            <p className="mt-4 font-[PretendardVariable] text-sm text-[#999999]">
+              아직 등록된 리뷰가 없습니다.
+            </p>
+          </section>
+        )}
+
         <QASection ref={qaRef} />
       </main>
 
@@ -278,23 +425,31 @@ const PhotoSection = forwardRef<HTMLElement, { photos: string[] }>(
           </button>
         </div>
 
-        <div className="-mx-5 overflow-x-auto px-5">
-          <div className="flex gap-3">
-            {photos.map((photo, index) => (
-              <button
-                key={photo}
-                type="button"
-                className="h-36 w-36 shrink-0 overflow-hidden rounded-2xl bg-[#F1F3F5]"
-              >
-                <img
-                  src={photo}
-                  alt={`실거주 사진 ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            ))}
+        {photos.length === 0 ? (
+          <div className="flex h-36 items-center justify-center rounded-2xl bg-[#F1F3F5]">
+            <p className="font-[PretendardVariable] text-sm text-[#999999]">
+              등록된 사진이 없습니다.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className="-mx-5 overflow-x-auto px-5">
+            <div className="flex gap-3">
+              {photos.map((photo, index) => (
+                <button
+                  key={`${photo}-${index}`}
+                  type="button"
+                  className="h-36 w-36 shrink-0 overflow-hidden rounded-2xl bg-[#F1F3F5]"
+                >
+                  <img
+                    src={photo}
+                    alt={`실거주 사진 ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     );
   },
