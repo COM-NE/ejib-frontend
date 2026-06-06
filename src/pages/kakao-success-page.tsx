@@ -36,6 +36,19 @@ export default function KakaoSuccessPage() {
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
 
+        if (!data.accessToken || data.refreshToken == "undefined") {
+          console.error("accessToken이 없습니다. 응답 데이터:", data);
+          alert("로그인 토큰을 받지 못했습니다. 다시 로그인해주세요.");
+          navigate("/login", { replace: true });
+          return;
+        }
+
+        localStorage.setItem("accessToken", data.accessToken);
+
+        if (data.refreshToken) {
+          localStorage.setItem("refreshToken", data.refreshToken);
+        }
+
         if (data.newUser || !data.onboardingCompleted) {
           navigate("/register/nickname", { replace: true });
           return;

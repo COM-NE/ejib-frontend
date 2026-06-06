@@ -10,7 +10,14 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const accessToken = localStorage.getItem("accessToken");
+    const rawAccessToken = localStorage.getItem("accessToken");
+
+    const accessToken =
+      rawAccessToken &&
+      rawAccessToken !== "undefined" &&
+      rawAccessToken !== "null"
+        ? rawAccessToken
+        : null;
 
     const noAuthUrls = [
       "/api/v1/auth/kakao/tokens",
@@ -34,6 +41,7 @@ axiosInstance.interceptors.request.use(
       params: config.params,
       data: config.data,
       hasAccessToken: !!accessToken,
+      accessTokenPreview: accessToken ? accessToken.slice(0, 20) + "..." : null,
       isNoAuthRequest,
     });
 

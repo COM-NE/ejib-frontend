@@ -11,10 +11,14 @@ export interface KakaoTokenResponse {
   onboardingCompleted: boolean;
 }
 
-export const postKakaoTokens = async (ticket: string) => {
+export const postKakaoTokens = async (
+  ticket: string,
+): Promise<KakaoTokenResponse> => {
   const response = await axiosInstance.post("/api/v1/auth/kakao/tokens", {
     ticket,
   });
 
-  return response.data;
+  console.log("[카카오 토큰 원본 응답]", response.data);
+
+  return response.data.data ?? response.data;
 };
