@@ -2,13 +2,20 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import AiLoadingPage from "../ai-loading-page";
 import Modal from "../../components/common/Modal";
+import { verifyContract } from "../../api/reviewApi";
+import { useOnboardingStore } from "../../store/onboardingStore";
+import { useReviewStore } from "../../store/reviewStore";
 
 export default function ReviewOcrPage() {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [stream, setStream] = useState<MediaStream | null>(null);
+
+  const nickname = useOnboardingStore((state) => state.nickname);
+  const selectedProperty = useReviewStore((state) => state.selectedProperty);
 
   //카메라
   useEffect(() => {
@@ -36,22 +43,51 @@ export default function ReviewOcrPage() {
     };
   }, []);
 
-  const handleCapture = () => {
+  const handleCapture = async () => {
+    if (!videoRef.current) return;
+
     setIsLoading(true);
 
-    // 백엔드 OCR 인증 시뮬레이션
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
       
-      // 80% 확률로 성공 시뮬레이션
-      const isSuccess = Math.random() > 0.2;
-      
-      if (isSuccess) {
+      if (!ctx) {
+        throw new Error("Canvas context를 생성할 수 없습니다.");
+      }
+
+      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/jpeg", 0.8)
+      );
+
+      if (!blob) {
+        throw new Error("이미지 생성에 실패했습니다.");
+      }
+
+      const file = new File([blob], "contract.jpg", { type: "image/jpeg" });
+      const address = selectedProperty?.address || "";
+      const userName = nickname || "홍길동"; //수정예정
+
+      const response = await verifyContract(file, userName, address);
+
+      if (response.verified) {
         navigate("/reviews/ocr/success");
       } else {
+        setErrorMessage(response.message || "계약서 정보가 일치하지 않습니다.");
         setShowErrorModal(true);
       }
-    }, 3000);
+    } catch (error: any) {
+      console.error("인증 실패:", error);
+      const message = error.response?.data?.message || "인증 처리 중 오류가 발생했습니다.";
+      setErrorMessage(message);
+      setShowErrorModal(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -169,8 +205,8 @@ export default function ReviewOcrPage() {
         isOpen={showErrorModal}
         onClose={() => setShowErrorModal(false)}
         title="인증 실패"
-        description="인증에 실패했습니다. 메인 화면으로 돌아갑니다."
-        onConfirm={() => navigate("/")}
+        description={errorMessage || "인증에 실패했습니다. 다시 시도해주세요."}
+        onConfirm={() => setShowErrorModal(false)}
       />
     </div>
   );

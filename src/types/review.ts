@@ -31,3 +31,14 @@ export interface ReviewResponse {
   imageUrls: string[];
   createdAt: string;
 }
+
+export interface OCRVerifyResponse {
+  verified: boolean;
+  message: string;
+}
+
+export interface OCRVerifyError {
+  code: string;
+  message: string;
+  status: number;
+}

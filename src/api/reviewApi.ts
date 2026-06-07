@@ -1,5 +1,9 @@
 import axiosInstance from "./axiosInstance";
-import type { ReviewRequest, ReviewResponse } from "../types/review";
+import type {
+  ReviewRequest,
+  ReviewResponse,
+  OCRVerifyResponse,
+} from "../types/review";
 
 export interface PropertySearchResponse {
   averageTotalScore: number;
@@ -37,6 +41,29 @@ export const registerReview = async (
 
   const response = await axiosInstance.post<ReviewResponse>(
     "/api/v1/reviews",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const verifyContract = async (
+  file: File,
+  userName: string,
+  address: string
+): Promise<OCRVerifyResponse> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("userName", userName);
+  formData.append("address", address);
+
+  const response = await axiosInstance.post<OCRVerifyResponse>(
+    "/api/v1/reviews/verify-contract",
     formData,
     {
       headers: {
