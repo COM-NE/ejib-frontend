@@ -1,7 +1,6 @@
 export interface ReviewRequest {
-  userId: number;
   propertyId: number;
-  reviewType: string; // "실거주" 등
+  reviewType: string; 
   residenceDuration: number;
   totalScore: number;
   houseScore: number;

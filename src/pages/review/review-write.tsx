@@ -5,6 +5,8 @@ import NavigationBar from "../../components/NavigationBar";
 import Dropdown from "../../components/common/Dropdown";
 import Modal from "../../components/common/Modal";
 import { useReviewStore } from "../../store/reviewStore";
+import { registerReview } from "../../api/reviewApi";
+import type { ReviewRequest } from "../../types/review";
 import starIcon from "../../assets/star.svg";
 import starFitIcon from "../../assets/starfit.svg";
 import camIcon from "../../assets/cam.svg";
@@ -59,6 +61,7 @@ export default function ReviewWritePage() {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     reviewType,
@@ -71,6 +74,8 @@ export default function ReviewWritePage() {
     setDetailedReview,
     photos,
     setPhotos,
+    photoFiles,
+    setPhotoFiles,
     resetReview,
   } = useReviewStore();
 
@@ -109,6 +114,7 @@ export default function ReviewWritePage() {
 
     const newPhotos = await Promise.all(newPhotosPromises);
     setPhotos([...photos, ...newPhotos]);
+    setPhotoFiles([...photoFiles, ...filesToProcess]);
     
     // Reset input value to allow selecting the same file again
     if (fileInputRef.current) {
@@ -124,10 +130,45 @@ export default function ReviewWritePage() {
     ratings.security === 0 ||
     ratings.environment === 0 ||
     ratings.total === 0 ||
-    !detailedReview;
+    !detailedReview ||
+    isSubmitting;
 
-  const handleSubmit = () => {
-    setIsSuccessModalOpen(true);
+  const handleSubmit = async () => {
+    if (!selectedProperty) return;
+
+    setIsSubmitting(true);
+    try {
+      // Map duration string to number
+      const durationMap: Record<string, number> = {
+        "6개월 미만": 6,
+        "6개월~1년": 12,
+        "1년~2년": 24,
+        "2년 이상": 36,
+      };
+
+      const reviewData: ReviewRequest = {
+        propertyId: selectedProperty.id,
+        reviewType: reviewType === "resident" ? "실거주" : "임장",
+        residenceDuration: durationMap[contractInfo.duration] || 0,
+        totalScore: ratings.total,
+        houseScore: ratings.house,
+        facilityScore: ratings.facility,
+        infraScore: ratings.infrastructure,
+        safetyScore: ratings.security,
+        envScore: ratings.environment,
+        content: detailedReview,
+        deposit: Number(contractInfo.deposit),
+        monthlyRent: contractInfo.leaseType === "월세" ? Number(contractInfo.monthlyRent) : 0,
+      };
+
+      await registerReview(reviewData, photoFiles);
+      setIsSuccessModalOpen(true);
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      alert("리뷰 등록에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleModalConfirm = () => {
