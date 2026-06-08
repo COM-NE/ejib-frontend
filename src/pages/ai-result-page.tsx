@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
@@ -15,26 +15,23 @@ declare global {
   }
 }
 
-// 목데이터 
-const MOCK_RESULT: AiRecommendationResponse = {
-  propertyId: 1,
-  propertyName: "라일락 가든하우스",
-  address: "경기도 부천시 원미구 지봉로45번길 14",
-  latitude: 37.199,
-  longitude: 126.831,
-  averageScore: 4.5,
-  reviewCount: 10,
-  aiSummary:
-    "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다. 사용자의 요구사항인 '깨끗한 집', '치안 좋음'에 가장 부합하는 매물입니다.",
-};
-
 export default function AiResultPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { nickname } = getOnboardingData();
-  const result = MOCK_RESULT;
+  
+  const result = location.state?.result as AiRecommendationResponse;
+  console.log("[AiResultPage] location.state:", location.state);
+  console.log("[AiResultPage] result data:", result);
   const mapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!result) {
+      console.warn("[AiResultPage] 결과 데이터가 없어 ai 페이지로 리다이렉트합니다.");
+      navigate("/ai", { replace: true });
+      return;
+    }
+
     if (!window.kakao || !mapRef.current) return;
 
     const { kakao } = window;
@@ -69,7 +66,9 @@ export default function AiResultPage() {
 
       customOverlay.setMap(map);
     });
-  }, [result.latitude, result.longitude, result.propertyName]);
+  }, [result, navigate]);
+
+  if (!result) return null;
 
   const handleReRecommend = () => {
     navigate("/ai");

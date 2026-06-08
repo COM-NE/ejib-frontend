@@ -5,6 +5,7 @@ import BottomNavigation from "../components/NavigationBar";
 import Dropdown from "../components/common/Dropdown";
 import BottomButton from "../components/common/BottomButton";
 import AiLoadingPage from "./ai-loading-page";
+import { getAiRecommendation } from "../api/aiApi";
 
 const REGION_DATA: Record<string, string[]> = {
   서울특별시: [
@@ -66,15 +67,33 @@ export default function AiPage() {
 
   const isFormValid = region1 && region2 && requirements.trim();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isFormValid) return;
     setIsLoading(true);
 
-    // 백엔드 API 연동 시 수정
-    setTimeout(() => {
-      console.log("추천 받기 완료", { region1, region2, requirements });
-      navigate("/ai/result");
-    }, 3000);
+    try {
+      const region = `${region1} ${region2}`;
+      console.log("[AiPage] 추천 요청 시작:", { region, userRequest: requirements });
+      const result = await getAiRecommendation({
+        region,
+        userRequest: requirements,
+      });
+      console.log("[AiPage] 추천 요청 성공. 결과 데이터:", result);
+      
+      if (!result || (typeof result === "object" && Object.keys(result).length === 0)) {
+        console.warn("[AiPage] 유효한 결과 데이터가 없습니다.");
+        alert("조건에 맞는 추천 매물을 찾지 못했습니다. 조건을 조금 다르게 입력해보세요.");
+        setIsLoading(false);
+        return;
+      }
+
+      navigate("/ai/result", { state: { result } });
+    } catch (error) {
+      console.error("AI 추천 요청 실패:", error);
+      alert("AI 추천을 가져오는 데 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
