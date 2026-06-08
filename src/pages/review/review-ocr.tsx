@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import AiLoadingPage from "../ai-loading-page";
 import Modal from "../../components/common/Modal";
 import { verifyContract } from "../../api/reviewApi";
@@ -12,20 +13,21 @@ export default function ReviewOcrPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [stream, setStream] = useState<MediaStream | null>(null);
 
   const nickname = useOnboardingStore((state) => state.nickname);
   const selectedProperty = useReviewStore((state) => state.selectedProperty);
 
   //카메라
   useEffect(() => {
+    let currentStream: MediaStream | null = null;
+
     async function startCamera() {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "environment" }, // 후면 카메라 우선
           audio: false,
         });
-        setStream(mediaStream);
+        currentStream = mediaStream;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
@@ -37,8 +39,8 @@ export default function ReviewOcrPage() {
     startCamera();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      if (currentStream) {
+        currentStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -80,9 +82,14 @@ export default function ReviewOcrPage() {
         setErrorMessage(response.message || "계약서 정보가 일치하지 않습니다.");
         setShowErrorModal(true);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("인증 실패:", error);
-      const message = error.response?.data?.message || "인증 처리 중 오류가 발생했습니다.";
+      let message = "인증 처리 중 오류가 발생했습니다.";
+      if (axios.isAxiosError(error)) {
+        message = error.response?.data?.message || message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
       setErrorMessage(message);
       setShowErrorModal(true);
     } finally {

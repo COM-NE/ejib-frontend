@@ -93,6 +93,7 @@ export const useReviewStore = create<ReviewState>()(
       name: "review-storage",
       version: 1,
       partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { photoFiles, ...rest } = state;
         return rest;
       },
