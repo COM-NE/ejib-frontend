@@ -1,41 +1,47 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../components/common/Header";
 import BottomNavigation from "../../components/NavigationBar";
 import BottomButton from "../../components/common/BottomButton";
 import { useReviewStore } from "../../store/reviewStore";
-
-const MOCK_PROPERTIES = [
-  {
-    id: 1,
-    name: "소사역힐스센텀",
-    address: "경기도 부천시 원미구 지봉로45번길 14",
-  },
-  {
-    id: 2,
-    name: "소사역 푸르지오",
-    address: "경기도 부천시 소사구 소사본동 413",
-  },
-  {
-    id: 3,
-    name: "부천 소사역 한신더휴",
-    address: "경기도 부천시 소사본동 70-16",
-  },
-];
+import { searchPropertiesForReview, type PropertySearchResponse } from "../../api/reviewApi";
 
 export default function ReviewSelectPage() {
   const navigate = useNavigate();
   const { selectedProperty, reviewType, setSelectedProperty, setReviewType } = useReviewStore();
   const [searchQuery, setSearchQuery] = useState(selectedProperty?.name || "");
   const [isFocused, setIsFocused] = useState(false);
+  const [properties, setProperties] = useState<PropertySearchResponse[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const filteredProperties = searchQuery
-    ? MOCK_PROPERTIES.filter((p) => p.name.includes(searchQuery))
-    : MOCK_PROPERTIES;
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (searchQuery.trim() && isFocused) {
+        setLoading(true);
+        try {
+          const results = await searchPropertiesForReview(searchQuery);
+          setProperties(results);
+        } catch (error) {
+          console.error("Failed to fetch properties:", error);
+          setProperties([]);
+        } finally {
+          setLoading(false);
+        }
+      } else if (!searchQuery.trim()) {
+        setProperties([]);
+      }
+    }, 300);
 
-  const handlePropertySelect = (property: typeof MOCK_PROPERTIES[0]) => {
-    setSelectedProperty(property);
-    setSearchQuery(property.name);
+    return () => clearTimeout(timer);
+  }, [searchQuery, isFocused]);
+
+  const handlePropertySelect = (property: PropertySearchResponse) => {
+    setSelectedProperty({
+      id: property.id,
+      name: property.propertyName,
+      address: property.propertyAddress,
+    });
+    setSearchQuery(property.propertyName);
     setIsFocused(false);
   };
 
@@ -97,19 +103,23 @@ export default function ReviewSelectPage() {
                 className="absolute left-0 top-[54px] z-10 w-full overflow-hidden rounded-[15px] bg-white shadow-[0px_3px_10px_2px_rgba(80,96,254,0.1)]"
               >
                 <div className="max-h-[220px] overflow-y-auto py-4">
-                  {filteredProperties.length > 0 ? (
-                    filteredProperties.map((property) => (
+                  {loading ? (
+                    <div className="px-4 py-2 text-sm text-[#ABABAB]">검색 중...</div>
+                  ) : properties.length > 0 ? (
+                    properties.map((property) => (
                       <div
                         key={property.id}
                         className="flex flex-col gap-1 px-4 py-2 hover:bg-[#5060FE]/10 cursor-pointer"
                         onClick={() => handlePropertySelect(property)}
                       >
-                        <p className="text-base text-[#2C2C2C]">{property.name}</p>
-                        <p className="text-xs text-[#2C2C2C]">{property.address}</p>
+                        <p className="text-base text-[#2C2C2C]">{property.propertyName}</p>
+                        <p className="text-xs text-[#2C2C2C]">{property.propertyAddress}</p>
                       </div>
                     ))
                   ) : (
-                    <div className="px-4 py-2 text-sm text-[#ABABAB]">검색 결과가 없습니다.</div>
+                    <div className="px-4 py-2 text-sm text-[#ABABAB]">
+                      {searchQuery.trim() ? "검색 결과가 없습니다." : "매물명을 입력해주세요."}
+                    </div>
                   )}
                 </div>
               </div>
