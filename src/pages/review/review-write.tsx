@@ -130,7 +130,7 @@ export default function ReviewWritePage() {
     ratings.security === 0 ||
     ratings.environment === 0 ||
     ratings.total === 0 ||
-    !detailedReview ||
+    detailedReview.length < 10 ||
     isSubmitting;
 
   const handleSubmit = async () => {
@@ -230,15 +230,32 @@ export default function ReviewWritePage() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <p className="text-sm font-medium text-[#2c2c2c]">
-            이집의 전체후기를 자세히 남겨주세요
-          </p>
+          <div className="flex justify-between items-end">
+            <p className="text-sm font-medium text-[#2c2c2c]">
+              이집의 전체후기를 자세히 남겨주세요
+            </p>
+            <span className="text-xs text-[#ababab]">
+              <span className={detailedReview.length >= 10 ? "text-[#5060FE]" : ""}>
+                {detailedReview.length}
+              </span>
+              /10
+            </span>
+          </div>
           <textarea
-            className="w-full h-[172px] p-4 rounded-[15px] bg-[#f4f7fb] text-sm text-[#2c2c2c] placeholder-[#ababab] outline-none resize-none"
-            placeholder="이 집의 장단점 등을 상세히 남겨주세요"
+            className={`w-full h-[172px] p-4 rounded-[15px] bg-[#f4f7fb] text-sm text-[#2c2c2c] placeholder-[#ababab] outline-none resize-none border ${
+              detailedReview.length > 0 && detailedReview.length < 10 
+                ? "border-[#FF5D5D]" 
+                : "border-transparent"
+            }`}
+            placeholder="이 집의 장단점 등을 상세히 남겨주세요 (최소 10자)"
             value={detailedReview}
             onChange={(e) => setDetailedReview(e.target.value)}
           />
+          {detailedReview.length > 0 && detailedReview.length < 10 && (
+            <p className="text-xs text-[#FF5D5D] ml-1">
+              최소 10자 이상 작성해주세요.
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-3">
