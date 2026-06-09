@@ -8,7 +8,7 @@ import { searchPropertiesForReview, type PropertySearchResponse } from "../../ap
 
 export default function ReviewSelectPage() {
   const navigate = useNavigate();
-  const { selectedProperty, reviewType, setSelectedProperty, setReviewType } = useReviewStore();
+  const { selectedProperty, reviewType, setSelectedProperty, setReviewType, resetReview } = useReviewStore();
   const [searchQuery, setSearchQuery] = useState(selectedProperty?.name || "");
   const [isFocused, setIsFocused] = useState(false);
   const [properties, setProperties] = useState<PropertySearchResponse[]>([]);
@@ -36,6 +36,8 @@ export default function ReviewSelectPage() {
   }, [searchQuery, isFocused]);
 
   const handlePropertySelect = (property: PropertySearchResponse) => {
+    resetReview();
+    
     setSelectedProperty({
       id: property.id,
       name: property.propertyName,
