@@ -158,7 +158,8 @@ export default function ReviewWritePage() {
         envScore: ratings.environment,
         content: detailedReview,
         deposit: Number(contractInfo.deposit),
-        monthlyRent: contractInfo.leaseType === "월세" ? Number(contractInfo.monthlyRent) : 0,
+        monthlyRent: Number(contractInfo.monthlyRent) || 0,
+        //maintenanceFee: Number(contractInfo.maintenanceFee) || 0,
       };
 
       await registerReview(reviewData, photoFiles);
