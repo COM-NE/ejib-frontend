@@ -11,6 +11,7 @@ export interface ReviewRequest {
   content: string;
   deposit: number;
   monthlyRent: number;
+  //maintenanceFee: number;
 }
 
 export interface ReviewResponse {
@@ -27,6 +28,7 @@ export interface ReviewResponse {
   content: string;
   deposit: number;
   monthlyRent: number;
+  //maintenanceFee: number;
   imageUrls: string[];
   createdAt: string;
 }

@@ -35,9 +35,11 @@ export const registerReview = async (
     })
   );
 
-  images.forEach((file) => {
-    formData.append("images", file);
-  });
+  if (images && images.length > 0) {
+    images.forEach((file) => {
+      formData.append("images", file);
+    });
+  }
 
   const response = await axiosInstance.post<ReviewResponse>(
     "/api/v1/reviews",

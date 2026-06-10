@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { postKakaoTokens } from "../api/authApi";
+import { useReviewStore } from "../store/reviewStore";
 
 export default function KakaoSuccessPage() {
   const navigate = useNavigate();
   const hasRequested = useRef(false);
+  const { resetReview } = useReviewStore();
 
   useEffect(() => {
     const handleKakaoSuccess = async () => {
@@ -33,18 +35,17 @@ export default function KakaoSuccessPage() {
 
         console.log("[카카오 토큰 발급 성공]", data);
 
-        localStorage.setItem("accessToken", data.accessToken);
-        localStorage.setItem("refreshToken", data.refreshToken);
+        resetReview();
+        localStorage.removeItem("review-storage");
 
-        if (!data.accessToken || data.refreshToken == "undefined") {
-          console.error("accessToken이 없습니다. 응답 데이터:", data);
+        if (!data.accessToken || data.refreshToken === "undefined") {
+          console.error("토큰이 올바르지 않습니다. 응답 데이터:", data);
           alert("로그인 토큰을 받지 못했습니다. 다시 로그인해주세요.");
           navigate("/login", { replace: true });
           return;
         }
 
         localStorage.setItem("accessToken", data.accessToken);
-
         if (data.refreshToken) {
           localStorage.setItem("refreshToken", data.refreshToken);
         }
@@ -63,7 +64,7 @@ export default function KakaoSuccessPage() {
     };
 
     handleKakaoSuccess();
-  }, [navigate]);
+  }, [navigate, resetReview]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-white">
