@@ -1,6 +1,7 @@
+import axiosInstance from "./axiosInstance";
 import type { Property } from "../pages/search-page";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+// const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
 // type ApiResponse<T> = {
 //   isSuccess: boolean;
@@ -25,36 +26,6 @@ type PropertySearchDto = {
   transactionType: "월세" | "전세";
 };
 
-export async function searchProperties(name: string): Promise<Property[]> {
-  const token = localStorage.getItem("accessToken");
-
-  const response = await fetch(
-    `${BASE_URL}/api/v1/properties?name=${encodeURIComponent(name)}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`매물 검색 실패: ${response.status}`);
-  }
-
-  const data = (await response.json()) as PropertySearchDto[];
-
-  return data.map((item) => ({
-    id: item.id,
-    rentType: item.transactionType,
-    title: item.propertyName,
-    rating: item.averageTotalScore,
-    reviewCount: item.reviewCount,
-    address: item.propertyAddress,
-    isLiked: item.scrapped,
-  }));
-}
 export type PropertyDetail = {
   agency: string;
   area: number;
@@ -97,30 +68,95 @@ export type PropertyImage = {
   imageUrl: string;
 };
 
-async function request<T>(url: string): Promise<T> {
-  const token = localStorage.getItem("accessToken");
+export type QnaAnswer = {
+  id: number;
+  content: string;
+  createdAt: string;
+  userId: number;
+  userNickname: string;
+};
 
-  const response = await fetch(`${BASE_URL}${url}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+export type QnaQuestion = {
+  id: number;
+  content: string;
+  createdAt: string;
+  userId: number;
+  userNickname: string;
+  answers: QnaAnswer[];
+};
+
+type QnaAnswerDto = {
+  id: number;
+  content: string;
+  createdAt: string;
+  userId: number;
+  userNickname: string;
+};
+
+type QnaQuestionDto = {
+  id: number;
+  content: string;
+  createdAt: string;
+  userId: number;
+  userNickname: string;
+  answers: QnaAnswerDto[];
+};
+
+type CreateQnaRequest = {
+  content: string;
+};
+
+type PropertyScrapDto = {
+  scrapped: boolean;
+};
+
+// async function request<T>(url: string): Promise<T> {
+//   const token = localStorage.getItem("accessToken");
+
+//   const response = await fetch(`${BASE_URL}${url}`, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//     },
+//   });
+
+//   if (!response.ok) {
+//     throw new Error(`API 요청 실패: ${response.status}`);
+//   }
+
+//   return response.json();
+// }
+
+export async function searchProperties(name: string): Promise<Property[]> {
+  const response = await axiosInstance.get<PropertySearchDto[]>(
+    "/api/v1/properties",
+    {
+      params: {
+        name,
+      },
     },
-  });
+  );
 
-  if (!response.ok) {
-    throw new Error(`API 요청 실패: ${response.status}`);
-  }
-
-  return response.json();
+  return response.data.map((item) => ({
+    id: item.id,
+    rentType: item.transactionType,
+    title: item.propertyName,
+    rating: item.averageTotalScore,
+    reviewCount: item.reviewCount,
+    address: item.propertyAddress,
+    isLiked: item.scrapped,
+  }));
 }
 
 export async function getPropertyDetail(
   propertyId: number,
 ): Promise<PropertyDetail> {
-  const data = await request<PropertyDetailDto>(
+  const response = await axiosInstance.get<PropertyDetailDto>(
     `/api/v1/properties/${propertyId}`,
   );
+
+  const data = response.data;
 
   return {
     agency: data.agency,
@@ -142,12 +178,96 @@ export async function getPropertyDetail(
 export async function getPropertyImages(
   propertyId: number,
 ): Promise<PropertyImage[]> {
-  const data = await request<PropertyImageDto[]>(
+  const response = await axiosInstance.get<PropertyImageDto[]>(
     `/api/v1/properties/${propertyId}/images`,
   );
 
-  return data.map((image) => ({
+  return response.data.map((image) => ({
     id: image.id,
     imageUrl: image.image_url,
   }));
+}
+
+export async function getPropertyQna(
+  propertyId: number,
+): Promise<QnaQuestion[]> {
+  const response = await axiosInstance.get<QnaQuestionDto[]>(
+    `/api/v1/properties/${propertyId}/qna`,
+  );
+
+  return response.data.map((question) => ({
+    id: question.id,
+    content: question.content,
+    createdAt: question.createdAt,
+    userId: question.userId,
+    userNickname: question.userNickname,
+    answers: question.answers.map((answer) => ({
+      id: answer.id,
+      content: answer.content,
+      createdAt: answer.createdAt,
+      userId: answer.userId,
+      userNickname: answer.userNickname,
+    })),
+  }));
+}
+
+export async function createPropertyQuestion(
+  propertyId: number,
+  content: string,
+): Promise<QnaQuestion> {
+  const response = await axiosInstance.post<QnaQuestionDto>(
+    `/api/v1/properties/${propertyId}/questions`,
+    {
+      content,
+    } satisfies CreateQnaRequest,
+  );
+
+  const question = response.data;
+
+  return {
+    id: question.id,
+    content: question.content,
+    createdAt: question.createdAt,
+    userId: question.userId,
+    userNickname: question.userNickname,
+    answers: question.answers.map((answer) => ({
+      id: answer.id,
+      content: answer.content,
+      createdAt: answer.createdAt,
+      userId: answer.userId,
+      userNickname: answer.userNickname,
+    })),
+  };
+}
+
+export async function createQuestionAnswer(
+  questionId: number,
+  content: string,
+): Promise<QnaAnswer> {
+  const response = await axiosInstance.post<QnaAnswerDto>(
+    `/api/v1/questions/${questionId}/answers`,
+    {
+      content,
+    } satisfies CreateQnaRequest,
+  );
+
+  const answer = response.data;
+
+  return {
+    id: answer.id,
+    content: answer.content,
+    createdAt: answer.createdAt,
+    userId: answer.userId,
+    userNickname: answer.userNickname,
+  };
+}
+
+export async function togglePropertyScrap(
+  propertyId: number,
+): Promise<boolean> {
+  const response = await axiosInstance.patch<PropertyScrapDto>(
+    `/api/v1/properties/${propertyId}/scrap`,
+  );
+
+  return response.data.scrapped;
 }
