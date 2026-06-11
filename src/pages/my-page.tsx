@@ -1,6 +1,7 @@
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
 import zibi from "../assets/onboarding/zibi-yellow.png";
+import { useReviewStore } from "../store/reviewStore";
 
 const myActivities = [
   {
@@ -25,10 +26,15 @@ function MyPage() {
     name: "김가대",
     point: 5320,
   };
+  const { resetReview } = useReviewStore();
 
   const handleLogout = () => {
-    // 나중에 실제 로그아웃 API / 토큰 삭제 로직 연결
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("review-storage"); // Clear persisted review data
+    resetReview();
     console.log("logout");
+    window.location.href = "/login";
   };
 
   return (
