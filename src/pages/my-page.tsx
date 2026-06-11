@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
-import zibi from "../assets/onboarding/zibi-yellow.png";
+import zibiYellow from "../assets/onboarding/zibi-yellow.png";
 import { useReviewStore } from "../store/reviewStore";
+import { getMyProfile, type MyProfile } from "../api/user";
 
 const myActivities = [
   {
@@ -21,63 +23,102 @@ const myInfo = [
   },
 ];
 
-function MyPage() {
-  const user = {
-    name: "김가대",
-    point: 5320,
-  };
+export default function MyPage() {
+  const [user, setUser] = useState<MyProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
   const { resetReview } = useReviewStore();
+
+  useEffect(() => {
+    const fetchMyProfile = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const profile = await getMyProfile();
+        setUser(profile);
+      } catch (err) {
+        console.error(err);
+        setError("프로필 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMyProfile();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
-    localStorage.removeItem("review-storage"); // Clear persisted review data
+    localStorage.removeItem("review-storage");
     resetReview();
     console.log("logout");
     window.location.href = "/login";
   };
 
+  if (loading) {
+    return (
+      <main className="relative mx-auto flex min-h-screen max-w-[430px] items-center justify-center bg-white pb-28 text-[#111111]">
+        <p className="font-[PretendardVariable] text-sm text-[#999999]">
+          프로필 정보를 불러오는 중입니다...
+        </p>
+      </main>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <main className="relative mx-auto flex min-h-screen max-w-[430px] items-center justify-center bg-white pb-28 text-[#111111]">
+        <p className="font-[PretendardVariable] text-sm text-red-500">
+          {error || "프로필 정보가 없습니다."}
+        </p>
+      </main>
+    );
+  }
+
   return (
     <main className="relative mx-auto min-h-screen max-w-[430px] bg-white pb-28 text-[#111111]">
       <Header variant="page" title="마이페이지" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-5 pt-5">
         <div className="flex items-center gap-4">
           <div className="flex h-[66px] w-[66px] items-center justify-center rounded-full bg-[#F7F8FB]">
             <img
-              src={zibi}
+              src={zibiYellow}
               alt="프로필 이미지"
               className="h-12 w-12 object-contain"
             />
           </div>
 
-          <p className="text-xl font-semibold font-[PretendardVariable]">
-            {user.name}
+          <p className="font-[PretendardVariable] text-xl font-semibold">
+            {user.nickname}
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded-full border border-[#E0E0E0] px-3 py-1 text-[11px] text-[#B0B0B0] font-[PretendardVariable] font-medium hover:bg-gray-100"
+          className="rounded-full border border-[#E0E0E0] px-3 py-1 font-[PretendardVariable] text-[11px] font-medium text-[#B0B0B0] hover:bg-gray-100"
         >
           로그아웃
         </button>
       </div>
 
-      <div className="mt-7 rounded-lg bg-[#5060FE] px-4 py-4 text-white">
-        <p className="text-md font-[PretendardVariable] opacity-90">
+      <div className="mx-5 mt-7 rounded-lg bg-[#5060FE] px-4 py-4 text-white">
+        <p className="font-[PretendardVariable] text-md opacity-90">
           내 포인트
         </p>
-        <p className="mt-2 text-lg font-bold font-[PretendardVariable]">
+        <p className="mt-2 font-[PretendardVariable] text-lg font-bold">
           {user.point.toLocaleString()}원
         </p>
       </div>
 
-      <div className="mt-6 h-px bg-[#E5E5E5]" />
+      <div className="mx-5 mt-6 h-px bg-[#E5E5E5]" />
 
-      <section className="py-8">
-        <h2 className="text-md font-[PretendardVariable] font-medium">
+      <section className="px-5 py-8">
+        <h2 className="font-[PretendardVariable] text-md font-medium">
           내 활동
         </h2>
 
@@ -89,7 +130,7 @@ function MyPage() {
               onClick={() => {
                 window.location.href = item.path;
               }}
-              className="block w-full text-left text-base font-[PretendardVariable] text-md"
+              className="block w-full text-left font-[PretendardVariable] text-base text-md"
             >
               {item.label}
             </button>
@@ -97,10 +138,10 @@ function MyPage() {
         </div>
       </section>
 
-      <div className="h-px bg-[#E5E5E5]" />
+      <div className="mx-5 h-px bg-[#E5E5E5]" />
 
-      <section className="py-8">
-        <h2 className="text-md font-[PretendardVariable] font-medium">
+      <section className="px-5 py-8">
+        <h2 className="font-[PretendardVariable] text-md font-medium">
           내 정보
         </h2>
 
@@ -112,7 +153,7 @@ function MyPage() {
               onClick={() => {
                 window.location.href = item.path;
               }}
-              className="block w-full text-left text-base font-[PretendardVariable] text-md"
+              className="block w-full text-left font-[PretendardVariable] text-base text-md"
             >
               {item.label}
             </button>
@@ -124,5 +165,3 @@ function MyPage() {
     </main>
   );
 }
-
-export default MyPage;
