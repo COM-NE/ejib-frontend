@@ -2,12 +2,12 @@ import type { Property } from "../pages/search-page";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-type ApiResponse<T> = {
-  isSuccess: boolean;
-  code: string;
-  message: string;
-  result: T;
-};
+// type ApiResponse<T> = {
+//   isSuccess: boolean;
+//   code: string;
+//   message: string;
+//   result: T;
+// };
 
 export type PropertySearchItem = {
   id: number;
@@ -16,14 +16,13 @@ export type PropertySearchItem = {
 };
 
 type PropertySearchDto = {
-  id?: number;
-  propertyId?: number;
-  transactionType?: "월세" | "전세";
-  propertyName?: string;
-  averageTotalScore?: number;
-  reviewCount?: number;
-  "property-address"?: string;
-  address?: string;
+  averageTotalScore: number;
+  id: number;
+  propertyAddress: string;
+  propertyName: string;
+  reviewCount: number;
+  scrapped: boolean;
+  transactionType: "월세" | "전세";
 };
 
 export async function searchProperties(name: string): Promise<Property[]> {
@@ -44,31 +43,18 @@ export async function searchProperties(name: string): Promise<Property[]> {
     throw new Error(`매물 검색 실패: ${response.status}`);
   }
 
-  const data = (await response.json()) as ApiResponse<
-    PropertySearchDto[] | PropertySearchDto
-  >;
+  const data = (await response.json()) as PropertySearchDto[];
 
-  const rawResult = data.result;
-
-  const resultArray = Array.isArray(rawResult)
-    ? rawResult
-    : rawResult
-      ? [rawResult]
-      : [];
-
-  return resultArray
-    .map((item) => ({
-      id: item.id ?? item.propertyId ?? 0,
-      rentType: item.transactionType ?? "월세",
-      title: item.propertyName ?? "",
-      rating: item.averageTotalScore ?? 0,
-      reviewCount: item.reviewCount ?? 0,
-      address: item["property-address"] ?? item.address ?? "",
-      isLiked: false,
-    }))
-    .filter((item) => item.id !== 0);
+  return data.map((item) => ({
+    id: item.id,
+    rentType: item.transactionType,
+    title: item.propertyName,
+    rating: item.averageTotalScore,
+    reviewCount: item.reviewCount,
+    address: item.propertyAddress,
+    isLiked: item.scrapped,
+  }));
 }
-
 export type PropertyDetail = {
   agency: string;
   area: number;

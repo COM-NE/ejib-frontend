@@ -65,7 +65,7 @@ export default function RequirementPage() {
   const handleNext = () => {
     if (selectedRequirements.length < 1) return;
 
-    navigate("/home");
+    navigate("/");
   };
 
   return (
