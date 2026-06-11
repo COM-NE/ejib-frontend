@@ -27,7 +27,9 @@ axiosInstance.interceptors.request.use(
     const isNoAuthRequest = noAuthUrls.some((url) => config.url?.includes(url));
 
     if (accessToken && !isNoAuthRequest) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+      config.headers.Authorization = accessToken.startsWith("Bearer ")
+        ? accessToken
+        : `Bearer ${accessToken}`;
     } else {
       delete config.headers.Authorization;
     }
@@ -36,7 +38,7 @@ axiosInstance.interceptors.request.use(
       method: config.method?.toUpperCase(),
       baseURL: config.baseURL,
       url: config.url,
-      fullURL: `${config.baseURL}${config.url}`,
+      fullURL: `${config.baseURL ?? ""}${config.url ?? ""}`,
       headers: config.headers,
       params: config.params,
       data: config.data,

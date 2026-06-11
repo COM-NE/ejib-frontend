@@ -35,7 +35,7 @@ const publicRoutes: RouteObject[] = [
       { path: "login", element: <LoginPage /> },
       { path: "/oauth/kakao/success", element: <KakaoSuccessPage /> },
       { path: "search", element: <SearchPage /> },
-      { path: "detail", element: <DetailPage /> },
+      { path: "/properties/:propertyId", element: <DetailPage /> },
       { path: "ai", element: <AiPage /> },
       { path: "ai/result", element: <AiResultPage /> },
       { path: "reviews/select", element: <ReviewSelectPage /> },
