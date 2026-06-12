@@ -1,9 +1,20 @@
-import { forwardRef, useState, useEffect, useRef } from "react";
+import { forwardRef, useState, useEffect, useRef, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import Header from "../components/common/Header";
 import BottomNavigation from "../components/NavigationBar";
 import starIcon from "../assets/star.svg";
 import emptyStarIcon from "../assets/starfit.svg";
 import aiIcon from "../assets/home/ai.svg";
+import {
+  getPropertyDetail,
+  getPropertyImages,
+  getPropertyQna,
+  createPropertyQuestion,
+  createQuestionAnswer,
+  togglePropertyScrap,
+  type PropertyDetail,
+  type QnaQuestion,
+} from "../api/property";
 
 type ScoreKey = "집상태" | "시설물" | "인프라" | "치안" | "환경";
 
@@ -22,93 +33,61 @@ type Review = {
   scores: Record<ScoreKey, number>;
 };
 
-const detailData = {
+function buildDetailInfo(property: PropertyDetail): DetailInfo[] {
+  return [
+    { label: "매물타입", value: property.propertyType },
+    { label: "거래타입", value: property.transactionType },
+    { label: "가격", value: `${property.monthlyRent}만원` },
+    { label: "보증금", value: `${property.deposit}만원` },
+    { label: "층", value: `지상 ${property.floor}층` },
+    { label: "면적", value: `${property.area}m²` },
+    { label: "부동산", value: property.agency },
+    { label: "가톨릭대까지", value: `${property.distanceToSchool}m` },
+    { label: "주소", value: property.propertyAddress },
+    { label: "기타", value: property.description },
+  ];
+}
+
+function buildScoreData(averageTotalScore: number) {
+  return {
+    총점수: averageTotalScore,
+    집상태: averageTotalScore,
+    시설물: averageTotalScore,
+    인프라: averageTotalScore,
+    치안: averageTotalScore,
+    환경: averageTotalScore,
+  };
+}
+
+const mockReview: Review = {
   id: 1,
-  name: "소사역힐스센텀",
-  addressTitle: "매물 주소가 들어갑니다",
-  address: "경기도 부천시 원미구 지봉로45번길 14",
-  rating: 4.5,
-  reviewCount: 10,
-  aiSummary:
-    "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다.",
-  info: [
-    { label: "매물타입", value: "일반원룸" },
-    { label: "거래타입", value: "월세" },
-    { label: "가격", value: "50만원" },
-    { label: "보증금", value: "500만원" },
-    { label: "층", value: "지상 3층" },
-    { label: "면적", value: "17m²" },
-    { label: "부동산", value: "상상부동산공인중개사사무소" },
-    { label: "가톨릭대까지", value: "160m" },
-    { label: "주소", value: "경기도 부천시 원미구 지봉로45번길 14" },
-    { label: "기타", value: "가톨릭대 정문앞 원룸 월세" },
-  ] satisfies DetailInfo[],
-  photos: [
-    "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267d?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=700&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1560184897-ae75f418493e?w=700&auto=format&fit=crop",
-  ],
-  totalScores: {
-    총점수: 4.0,
+  userName: "사용자이름",
+  period: "3년 이상 거주 / 고층",
+  rating: 4.0,
+  date: "2026년 3월 작성",
+  content:
+    "학교와 가까워 이동이 편했고, 주변 편의시설도 적당히 있어 생활하기 좋았습니다.",
+  scores: {
     집상태: 3.0,
     시설물: 2.0,
     인프라: 5.0,
     치안: 3.0,
     환경: 4.0,
   },
-  review: {
-    id: 1,
-    userName: "사용자이름",
-    period: "3년 이상 거주 / 고층",
-    rating: 4.0,
-    date: "2026년 3월 작성",
-    content:
-      "계절이 지나가는 하늘에는 가을로 가득 차 있습니다. 어머님, 그리고 당신은 멀리 북간도에 계십니다. 학교와 가까워 이동이 편했고, 주변 편의시설도 적당히 있어 생활하기 좋았습니다.",
-    scores: {
-      집상태: 3.0,
-      시설물: 2.0,
-      인프라: 5.0,
-      치안: 3.0,
-      환경: 4.0,
-    },
-  } satisfies Review,
 };
 
-const questions = [
-  {
-    id: 1,
-    content:
-      "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
-    answers: [
-      "네 근처에 소사역이 있습니다.",
-      "소사역 앞에 가까운 버스 정류장이 있어요.",
-    ],
-  },
-  {
-    id: 2,
-    content:
-      "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
-    answers: ["네 근처에 소사역이 있습니다."],
-  },
-  {
-    id: 3,
-    content:
-      "소사역힐스센텀은 역세권인가요? 근처에 가까운 버스 정류장이 있나요?",
-    answers: [],
-  },
-];
-
-const tabs = [
-  { key: "info", label: "정보" },
-  { key: "photo", label: "사진" },
-  { key: "review", label: `리뷰 ${detailData.reviewCount}` },
-  { key: "qa", label: "Q&A" },
-];
-
 export default function DetailPage() {
+  const { propertyId } = useParams();
+
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
+  const [scrapLoading, setScrapLoading] = useState(false);
+
+  const [property, setProperty] = useState<PropertyDetail | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [qnaList, setQnaList] = useState<QnaQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const infoRef = useRef<HTMLElement | null>(null);
   const photoRef = useRef<HTMLElement | null>(null);
@@ -122,12 +101,145 @@ export default function DetailPage() {
     qa: qaRef,
   };
 
+  const tabs = useMemo(
+    () => [
+      { key: "info", label: "정보" },
+      { key: "photo", label: "사진" },
+      { key: "review", label: `리뷰 ${property?.reviewCount ?? 0}` },
+      { key: "qa", label: "Q&A" },
+    ],
+    [property?.reviewCount],
+  );
+
+  const detailInfo = useMemo(() => {
+    if (!property) return [];
+    return buildDetailInfo(property);
+  }, [property]);
+
+  const totalScores = useMemo(() => {
+    return buildScoreData(property?.averageTotalScore ?? 0);
+  }, [property?.averageTotalScore]);
+
+  useEffect(() => {
+    const fetchPropertyDetail = async () => {
+      if (!propertyId) return;
+
+      const numericPropertyId = Number(propertyId);
+
+      if (Number.isNaN(numericPropertyId)) {
+        setError("잘못된 매물 주소입니다.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const [detailData, imageData, qnaData] = await Promise.all([
+          getPropertyDetail(numericPropertyId),
+          getPropertyImages(numericPropertyId),
+          getPropertyQna(numericPropertyId),
+        ]);
+
+        setProperty(detailData);
+        setPhotos(imageData.map((image) => image.imageUrl));
+        setQnaList(qnaData);
+      } catch (err) {
+        console.error(err);
+        setError("매물 정보를 불러오지 못했습니다.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyDetail();
+  }, [propertyId]);
+
+  const handleCreateQuestion = async (content: string) => {
+    if (!propertyId) return;
+
+    const numericPropertyId = Number(propertyId);
+
+    if (Number.isNaN(numericPropertyId)) {
+      alert("잘못된 매물 주소입니다.");
+      return;
+    }
+
+    try {
+      const newQuestion = await createPropertyQuestion(
+        numericPropertyId,
+        content,
+      );
+
+      setQnaList((prev) => [newQuestion, ...prev]);
+    } catch (err) {
+      console.error(err);
+      alert("질문 등록에 실패했습니다.");
+    }
+  };
+
+  const handleCreateAnswer = async (questionId: number, content: string) => {
+    try {
+      const newAnswer = await createQuestionAnswer(questionId, content);
+
+      setQnaList((prev) =>
+        prev.map((question) =>
+          question.id === questionId
+            ? {
+                ...question,
+                answers: [...question.answers, newAnswer],
+              }
+            : question,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+      alert("답변 등록에 실패했습니다.");
+    }
+  };
+
+  const handleLikeClick = async () => {
+    if (!propertyId || scrapLoading) return;
+
+    const numericPropertyId = Number(propertyId);
+
+    if (Number.isNaN(numericPropertyId)) {
+      alert("잘못된 매물 주소입니다.");
+      return;
+    }
+
+    const previousLiked = isLiked;
+
+    try {
+      setScrapLoading(true);
+
+      // 먼저 UI를 바로 바꿔서 반응 빠르게 보이게 함
+      setIsLiked((prev) => !prev);
+
+      // 실제 서버 요청
+      const scrapped = await togglePropertyScrap(numericPropertyId);
+
+      // 서버 응답 기준으로 최종 반영
+      setIsLiked(scrapped);
+    } catch (err) {
+      console.error(err);
+
+      // 실패하면 원래 상태로 되돌림
+      setIsLiked(previousLiked);
+
+      alert("찜 상태 변경에 실패했습니다.");
+    } finally {
+      setScrapLoading(false);
+    }
+  };
+
   const handleTapClick = (key: string) => {
     setActiveTab(key);
 
     const targetRef = sectionRefs[key as keyof typeof sectionRefs].current;
+
     if (targetRef) {
-      // 탭 고정 높이(48px) + 헤더 고정 높이(56px) = 104px 만큼 여백을 두고 스크롤
       const elementPosition = targetRef.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - 104;
 
@@ -138,12 +250,10 @@ export default function DetailPage() {
     }
   };
 
-  // 스크롤 위치 감지하여 현재 보고 있는 섹션의 탭 활성화하기
   useEffect(() => {
     const handleScroll = () => {
-      const scrollPosition = window.scrollY + 110; // 여유 오차 바이어스 추가
+      const scrollPosition = window.scrollY + 110;
 
-      // const infoTop = infoRef.current?.offsetTop ?? 0;
       const photoTop = photoRef.current?.offsetTop ?? 0;
       const reviewTop = reviewRef.current?.offsetTop ?? 0;
       const qaTop = qaRef.current?.offsetTop ?? 0;
@@ -163,31 +273,55 @@ export default function DetailPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9]">
+        <p className="font-[PretendardVariable] text-sm text-[#666666]">
+          매물 정보를 불러오는 중입니다...
+        </p>
+      </div>
+    );
+  }
+
+  if (error || !property) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F7F9] px-5">
+        <p className="font-[PretendardVariable] text-sm text-red-500">
+          {error || "매물 정보가 없습니다."}
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#F6F7F9] w-full max-w-full">
-      {/* 상단 고정 헤더 */}
+    <div className="min-h-screen w-full max-w-full bg-[#F6F7F9]">
       <div className="sticky top-0 z-50 bg-white">
         <Header
           variant="detail"
-          title={detailData.name}
+          title={property.propertyName}
           isLiked={isLiked}
-          onLikeClick={() => setIsLiked((prev) => !prev)}
+          onLikeClick={handleLikeClick}
         />
       </div>
 
-      {/* main 태그 내 overflow-x-hidden 삭제 (sticky 무력화 원인 방지) */}
       <main className="pb-36">
         <section className="bg-white px-5 pb-6 pt-5">
           <h2 className="font-[PretendardVariable] text-xl font-semibold text-[#111111]">
-            {detailData.addressTitle}
+            {property.propertyName}
           </h2>
+
+          <p className="mt-2 font-[PretendardVariable] text-sm text-[#666666]">
+            {property.propertyAddress}
+          </p>
 
           <div className="mt-3 flex items-center gap-2 font-[PretendardVariable] text-base text-[#222222]">
             <img src={starIcon} alt="별점" className="h-5 w-5" />
+
             <span className="font-[PretendardVariable] font-medium">
-              {detailData.rating}
+              {property.averageTotalScore.toFixed(1)}
             </span>
-            <span>후기 {detailData.reviewCount}개</span>
+
+            <span>후기 {property.reviewCount}개</span>
           </div>
 
           <div className="mt-2 flex items-center gap-2 font-[PretendardVariable] text-base font-medium text-[#333333]">
@@ -196,11 +330,10 @@ export default function DetailPage() {
           </div>
 
           <p className="mt-2 font-[PretendardVariable] text-sm leading-relaxed text-[#444444]">
-            {detailData.aiSummary}
+            {property.description || "아직 등록된 설명이 없습니다."}
           </p>
         </section>
 
-        {/* 따라다니는 스티키 내비게이션 바 */}
         <nav className="sticky top-[56px] z-40 grid grid-cols-4 border-b border-[#E1E4EA] bg-white shadow-sm">
           {tabs.map((tab) => {
             const active = activeTab === tab.key;
@@ -224,12 +357,30 @@ export default function DetailPage() {
           })}
         </nav>
 
-        {/* 각 섹션 컴포넌트 */}
-        <InfoSection ref={infoRef} info={detailData.info} />
-        <PhotoSection ref={photoRef} photos={detailData.photos} />
-        <ScoreSection ref={reviewRef} scores={detailData.totalScores} />
-        <ReviewSection review={detailData.review} />
-        <QASection ref={qaRef} />
+        <InfoSection ref={infoRef} info={detailInfo} />
+        <PhotoSection ref={photoRef} photos={photos} />
+        <ScoreSection ref={reviewRef} scores={totalScores} />
+
+        {property.reviewCount > 0 ? (
+          <ReviewSection review={mockReview} />
+        ) : (
+          <section className="mt-3 bg-white px-5 py-7">
+            <h3 className="font-[PretendardVariable] text-lg font-medium text-[#111111]">
+              이집 리뷰
+            </h3>
+
+            <p className="mt-4 font-[PretendardVariable] text-sm text-[#999999]">
+              아직 등록된 리뷰가 없습니다.
+            </p>
+          </section>
+        )}
+
+        <QASection
+          ref={qaRef}
+          questions={qnaList}
+          onCreateQuestion={handleCreateQuestion}
+          onCreateAnswer={handleCreateAnswer}
+        />
       </main>
 
       <BottomNavigation />
@@ -278,23 +429,31 @@ const PhotoSection = forwardRef<HTMLElement, { photos: string[] }>(
           </button>
         </div>
 
-        <div className="-mx-5 overflow-x-auto px-5">
-          <div className="flex gap-3">
-            {photos.map((photo, index) => (
-              <button
-                key={photo}
-                type="button"
-                className="h-36 w-36 shrink-0 overflow-hidden rounded-2xl bg-[#F1F3F5]"
-              >
-                <img
-                  src={photo}
-                  alt={`실거주 사진 ${index + 1}`}
-                  className="h-full w-full object-cover"
-                />
-              </button>
-            ))}
+        {photos.length === 0 ? (
+          <div className="flex h-36 items-center justify-center rounded-2xl bg-[#F1F3F5]">
+            <p className="font-[PretendardVariable] text-sm text-[#999999]">
+              등록된 사진이 없습니다.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className="-mx-5 overflow-x-auto px-5">
+            <div className="flex gap-3">
+              {photos.map((photo, index) => (
+                <button
+                  key={`${photo}-${index}`}
+                  type="button"
+                  className="h-36 w-36 shrink-0 overflow-hidden rounded-2xl bg-[#F1F3F5]"
+                >
+                  <img
+                    src={photo}
+                    alt={`실거주 사진 ${index + 1}`}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     );
   },
@@ -355,99 +514,203 @@ const ScoreSection = forwardRef<
   );
 });
 
-const QASection = forwardRef<HTMLElement>((_, ref) => {
-  const [openedQuestionId, setOpenedQuestionId] = useState<number | null>(null);
+type QASectionProps = {
+  questions: QnaQuestion[];
+  onCreateQuestion: (content: string) => Promise<void>;
+  onCreateAnswer: (questionId: number, content: string) => Promise<void>;
+};
 
-  const handleQuestionClick = (questionId: number) => {
-    setOpenedQuestionId((prev) => (prev === questionId ? null : questionId));
-  };
+const QASection = forwardRef<HTMLElement, QASectionProps>(
+  ({ questions, onCreateQuestion, onCreateAnswer }, ref) => {
+    const [openedQuestionId, setOpenedQuestionId] = useState<number | null>(
+      null,
+    );
+    const [questionContent, setQuestionContent] = useState("");
+    const [answerContents, setAnswerContents] = useState<
+      Record<number, string>
+    >({});
+    const [questionSubmitting, setQuestionSubmitting] = useState(false);
+    const [answerSubmittingId, setAnswerSubmittingId] = useState<number | null>(
+      null,
+    );
 
-  return (
-    <section
-      ref={ref}
-      className="scroll-mt-[104px] mt-3 bg-white px-5 pb-32 pt-7"
-    >
-      <h3 className="font-[PretendardVariable] text-lg font-medium text-[#111111]">
-        Q&A
-      </h3>
+    const handleQuestionClick = (questionId: number) => {
+      setOpenedQuestionId((prev) => (prev === questionId ? null : questionId));
+    };
 
-      <div className="mt-6">
-        <p className="font-[PretendardVariable] text-base font-medium text-[#111111]">
-          질문 남기기
-        </p>
+    const handleQuestionSubmit = async () => {
+      const trimmedContent = questionContent.trim();
 
-        <textarea
-          placeholder="질문을 작성해주세요"
-          className="mt-4 h-20 w-full resize-none rounded-2xl bg-[#F3F5F9] px-4 py-4 font-[PretendardVariable] text-sm text-[#333333] outline-none placeholder:text-[#B7BBC3]"
-        />
-      </div>
+      if (!trimmedContent) {
+        alert("질문 내용을 입력해주세요.");
+        return;
+      }
 
-      <div className="mt-6 divide-y divide-[#E9ECF1] border-t border-[#E9ECF1]">
-        {questions.map((question) => {
-          const isOpen = openedQuestionId === question.id;
+      try {
+        setQuestionSubmitting(true);
+        await onCreateQuestion(trimmedContent);
+        setQuestionContent("");
+      } finally {
+        setQuestionSubmitting(false);
+      }
+    };
 
-          return (
-            <article key={question.id}>
-              <button
-                type="button"
-                onClick={() => handleQuestionClick(question.id)}
-                className="flex w-full items-center gap-3 py-4 text-left"
-                aria-expanded={isOpen}
-              >
-                <span className="font-[PretendardVariable] text-xl font-semibold text-[#5060FE]">
-                  Q.
-                </span>
+    const handleAnswerSubmit = async (questionId: number) => {
+      const trimmedContent = answerContents[questionId]?.trim();
 
-                <p className="flex-1 font-[PretendardVariable] text-sm leading-relaxed text-[#333333]">
-                  {question.content}
-                </p>
+      if (!trimmedContent) {
+        alert("답변 내용을 입력해주세요.");
+        return;
+      }
 
-                <span className="text-xl text-[#999999]">
-                  {isOpen ? "⌃" : "⌄"}
-                </span>
-              </button>
+      try {
+        setAnswerSubmittingId(questionId);
+        await onCreateAnswer(questionId, trimmedContent);
 
-              {isOpen && (
-                <div className="pb-4 pl-1">
-                  <div className="space-y-3">
-                    {question.answers.length > 0 ? (
-                      question.answers.map((answer, index) => (
-                        <div key={index} className="flex gap-3">
-                          <span className="font-[PretendardVariable] text-lg font-semibold text-[#FF6B6B]">
-                            A.
-                          </span>
+        setAnswerContents((prev) => ({
+          ...prev,
+          [questionId]: "",
+        }));
+      } finally {
+        setAnswerSubmittingId(null);
+      }
+    };
 
-                          <p className="pt-0.5 font-[PretendardVariable] text-sm leading-relaxed text-[#444444]">
-                            {answer}
-                          </p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="flex gap-3">
-                        <span className="font-[PretendardVariable] text-lg font-semibold text-[#FF6B6B]">
-                          A.
-                        </span>
+    return (
+      <section
+        ref={ref}
+        className="scroll-mt-[104px] mt-3 bg-white px-5 pb-32 pt-7"
+      >
+        <h3 className="font-[PretendardVariable] text-lg font-medium text-[#111111]">
+          Q&A
+        </h3>
 
-                        <p className="pt-0.5 font-[PretendardVariable] text-sm text-[#999999]">
-                          아직 등록된 답변이 없습니다.
-                        </p>
+        <div className="mt-6">
+          <p className="font-[PretendardVariable] text-base font-medium text-[#111111]">
+            질문 남기기
+          </p>
+
+          <textarea
+            value={questionContent}
+            onChange={(event) => setQuestionContent(event.target.value)}
+            placeholder="질문을 작성해주세요"
+            className="mt-4 h-20 w-full resize-none rounded-2xl bg-[#F3F5F9] px-4 py-4 font-[PretendardVariable] text-sm text-[#333333] outline-none placeholder:text-[#B7BBC3]"
+          />
+
+          <button
+            type="button"
+            onClick={handleQuestionSubmit}
+            disabled={questionSubmitting}
+            className="mt-3 h-10 w-full rounded-2xl bg-[#5060FE] font-[PretendardVariable] text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {questionSubmitting ? "등록 중..." : "질문 등록"}
+          </button>
+        </div>
+
+        <div className="mt-6 divide-y divide-[#E9ECF1] border-t border-[#E9ECF1]">
+          {questions.length === 0 ? (
+            <p className="py-6 font-[PretendardVariable] text-sm text-[#999999]">
+              아직 등록된 질문이 없습니다.
+            </p>
+          ) : (
+            questions.map((question) => {
+              const isOpen = openedQuestionId === question.id;
+              const answerContent = answerContents[question.id] ?? "";
+
+              return (
+                <article key={question.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleQuestionClick(question.id)}
+                    className="flex w-full items-center gap-3 py-4 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-[PretendardVariable] text-xl font-semibold text-[#5060FE]">
+                      Q.
+                    </span>
+
+                    <div className="flex-1">
+                      <p className="font-[PretendardVariable] text-sm leading-relaxed text-[#333333]">
+                        {question.content}
+                      </p>
+
+                      <p className="mt-1 font-[PretendardVariable] text-xs text-[#999999]">
+                        {question.userNickname}
+                      </p>
+                    </div>
+
+                    <span className="text-xl text-[#999999]">
+                      {isOpen ? "⌃" : "⌄"}
+                    </span>
+                  </button>
+
+                  {isOpen && (
+                    <div className="pb-4 pl-1">
+                      <div className="space-y-3">
+                        {question.answers.length > 0 ? (
+                          question.answers.map((answer) => (
+                            <div key={answer.id} className="flex gap-3">
+                              <span className="font-[PretendardVariable] text-lg font-semibold text-[#FF6B6B]">
+                                A.
+                              </span>
+
+                              <div>
+                                <p className="pt-0.5 font-[PretendardVariable] text-sm leading-relaxed text-[#444444]">
+                                  {answer.content}
+                                </p>
+
+                                <p className="mt-1 font-[PretendardVariable] text-xs text-[#999999]">
+                                  {answer.userNickname}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="flex gap-3">
+                            <span className="font-[PretendardVariable] text-lg font-semibold text-[#FF6B6B]">
+                              A.
+                            </span>
+
+                            <p className="pt-0.5 font-[PretendardVariable] text-sm text-[#999999]">
+                              아직 등록된 답변이 없습니다.
+                            </p>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
 
-                  <textarea
-                    placeholder="답변을 작성해주세요"
-                    className="mt-4 h-12 w-full resize-none rounded-2xl bg-[#F3F5F9] px-4 py-3 font-[PretendardVariable] text-sm text-[#333333] outline-none placeholder:text-[#B7BBC3]"
-                  />
-                </div>
-              )}
-            </article>
-          );
-        })}
-      </div>
-    </section>
-  );
-});
+                      <textarea
+                        value={answerContent}
+                        onChange={(event) =>
+                          setAnswerContents((prev) => ({
+                            ...prev,
+                            [question.id]: event.target.value,
+                          }))
+                        }
+                        placeholder="답변을 작성해주세요"
+                        className="mt-4 h-12 w-full resize-none rounded-2xl bg-[#F3F5F9] px-4 py-3 font-[PretendardVariable] text-sm text-[#333333] outline-none placeholder:text-[#B7BBC3]"
+                      />
+
+                      <button
+                        type="button"
+                        onClick={() => handleAnswerSubmit(question.id)}
+                        disabled={answerSubmittingId === question.id}
+                        className="mt-3 h-9 w-full rounded-2xl bg-[#5060FE] font-[PretendardVariable] text-sm font-semibold text-white disabled:opacity-50"
+                      >
+                        {answerSubmittingId === question.id
+                          ? "등록 중..."
+                          : "답변 등록"}
+                      </button>
+                    </div>
+                  )}
+                </article>
+              );
+            })
+          )}
+        </div>
+      </section>
+    );
+  },
+);
 
 function RadarChart({ scores }: { scores: Record<ScoreKey, number> }) {
   const center = 80;

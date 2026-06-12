@@ -33,6 +33,7 @@ interface ReviewState {
   ratings: Ratings;
   detailedReview: string;
   photos: string[];
+  photoFiles: File[];
 
   // Actions
   setSelectedProperty: (property: Property | null) => void;
@@ -41,6 +42,7 @@ interface ReviewState {
   setRating: (key: keyof Ratings, value: number) => void;
   setDetailedReview: (review: string) => void;
   setPhotos: (photos: string[]) => void;
+  setPhotoFiles: (files: File[]) => void;
   resetReview: () => void;
 }
 
@@ -64,6 +66,7 @@ const initialState = {
   },
   detailedReview: "",
   photos: [],
+  photoFiles: [],
 };
 
 export const useReviewStore = create<ReviewState>()(
@@ -83,11 +86,17 @@ export const useReviewStore = create<ReviewState>()(
         })),
       setDetailedReview: (detailedReview) => set({ detailedReview }),
       setPhotos: (photos) => set({ photos }),
+      setPhotoFiles: (photoFiles) => set({ photoFiles }),
       resetReview: () => set(initialState),
     }),
     {
       name: "review-storage",
       version: 1,
+      partialize: (state) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { photoFiles, ...rest } = state;
+        return rest;
+      },
     }
   )
 );

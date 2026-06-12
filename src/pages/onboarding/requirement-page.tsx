@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
 import { useOnboardingStore } from "../../store/onboardingStore";
 import type { RequirementType } from "../../types/user";
+import { submitOnboarding } from "../../api/user";
 
 import waterIcon from "../../assets/onboarding/water-pressure.svg";
 import cleanlinessIcon from "../../assets/onboarding/cleanliness.svg";
@@ -38,10 +39,15 @@ const requirementOptions: Array<{
 
 export default function RequirementPage() {
   const navigate = useNavigate();
+  const nickname = useOnboardingStore((state) => state.nickname);
+  const profileImage = useOnboardingStore((state) => state.profileImage);
+  const userStatus = useOnboardingStore((state) => state.userStatus);
   const selectedRequirements = useOnboardingStore(
     (state) => state.requirements,
   );
   const setRequirements = useOnboardingStore((state) => state.setRequirements);
+  const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -62,10 +68,35 @@ export default function RequirementPage() {
     setRequirements([...selectedRequirements, id]);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (selectedRequirements.length < 1) return;
 
-    navigate("/home");
+    if (!nickname || !profileImage || !userStatus) {
+      alert("온보딩 정보가 부족합니다. 이전 단계를 다시 확인해주세요.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const completed = await submitOnboarding({
+        name: nickname,
+        nickname,
+        profile: profileImage,
+        status: userStatus,
+        requirement: selectedRequirements,
+      });
+
+      if (completed) {
+        resetOnboarding();
+        navigate("/home");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("회원가입 정보 저장에 실패했습니다.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -74,8 +105,8 @@ export default function RequirementPage() {
       title={<>집 구할 때 절대 포기 못 하는 3가지는?</>}
       subtitle="꼼꼼하게 분석해서 실속 있는 정보만 모아 보여드릴게요"
       onNext={handleNext}
-      buttonContext="완료"
-      disabled={selectedRequirements.length < 1}
+      buttonContext={submitting ? "저장 중..." : "완료"}
+      disabled={selectedRequirements.length < 1 || submitting}
     >
       <div className="mt-[clamp(18px,3vh,28px)]">
         <div className="grid grid-cols-3 gap-x-3 gap-y-[clamp(10px,1.8vh,20px)]">
