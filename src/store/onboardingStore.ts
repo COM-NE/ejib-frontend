@@ -9,6 +9,7 @@ import type {
 
 interface OnboardingStore extends OnboardingData {
   // 액션 메서드
+  setName: (name: string) => void;
   setNickname: (nickname: string) => void;
   setProfileImage: (profileImage: ProfileImageType | null) => void;
   setUserStatus: (userStatus: UserStatusType | null) => void;
@@ -22,6 +23,7 @@ interface OnboardingStore extends OnboardingData {
 }
 
 const initialState: OnboardingData = {
+  name: "",
   nickname: "",
   profileImage: null,
   userStatus: null,
@@ -32,6 +34,8 @@ export const useOnboardingStore = create<OnboardingStore>()(
   persist(
     (set) => ({
       ...initialState,
+
+      setName: (name) => set({ name }),
 
       setNickname: (nickname) => set({ nickname }),
 

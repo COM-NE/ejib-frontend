@@ -27,6 +27,7 @@ const profileOptions = [
 
 export default function ProfilePage() {
   const navigate = useNavigate();
+  const name = useOnboardingStore((state) => state.name);
   const nickname = useOnboardingStore((state) => state.nickname);
   const profileImage = useOnboardingStore((state) => state.profileImage);
   const setProfileImage = useOnboardingStore((state) => state.setProfileImage);
@@ -49,7 +50,7 @@ export default function ProfilePage() {
 
   return (
     <RegisterLayout
-      step={2}
+      step={3}
       title={<>반가워요! 당신의 프로필을 완성해주세요</>}
       subtitle="마음에 드는 프로필을 선택해주세요"
       onNext={handleNext}
@@ -68,7 +69,7 @@ export default function ProfilePage() {
 
         {/* 닉네임 */}
         <p className="mt-5 text-[22px] font-[PretendardVariable] font-bold text-[#111111]">
-          {nickname || "닉네임"}
+          {name || nickname || "닉네임"}
         </p>
 
         {/* 프로필 선택 리스트 */}

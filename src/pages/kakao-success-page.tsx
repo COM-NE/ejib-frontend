@@ -51,7 +51,7 @@ export default function KakaoSuccessPage() {
         }
 
         if (data.newUser || !data.onboardingCompleted) {
-          navigate("/register/nickname", { replace: true });
+          navigate("/register/name", { replace: true });
           return;
         }
 
