@@ -8,6 +8,7 @@ import type {
 const STORAGE_KEY = "onboarding_data";
 
 const defaultOnboardingData: OnboardingData = {
+  name: "",
   nickname: "",
   profileImage: null,
   userStatus: null,
@@ -25,6 +26,7 @@ export const getOnboardingData = (): OnboardingData => {
 
     // 기존 저장 방식(각 항목별로 저장)에서 마이그레이션
     const legacyData: OnboardingData = {
+      name: localStorage.getItem("name") ?? "",
       nickname: localStorage.getItem("nickname") ?? "",
       profileImage: (localStorage.getItem("profileImage") ??
         null) as ProfileImageType | null,
@@ -51,6 +53,7 @@ export const setOnboardingData = (data: Partial<OnboardingData>): void => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 
     // 기존 키들도 함께 업데이트 (호환성 유지)
+    if (updated.name) localStorage.setItem("name", updated.name);
     localStorage.setItem("nickname", updated.nickname);
     if (updated.profileImage)
       localStorage.setItem("profileImage", updated.profileImage);

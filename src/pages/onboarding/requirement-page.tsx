@@ -39,6 +39,7 @@ const requirementOptions: Array<{
 
 export default function RequirementPage() {
   const navigate = useNavigate();
+  const name = useOnboardingStore((state) => state.name);
   const nickname = useOnboardingStore((state) => state.nickname);
   const profileImage = useOnboardingStore((state) => state.profileImage);
   const userStatus = useOnboardingStore((state) => state.userStatus);
@@ -80,7 +81,7 @@ export default function RequirementPage() {
       setSubmitting(true);
 
       const completed = await submitOnboarding({
-        name: nickname,
+        name: name || nickname,
         nickname,
         profile: profileImage,
         status: userStatus,
@@ -101,7 +102,7 @@ export default function RequirementPage() {
 
   return (
     <RegisterLayout
-      step={4}
+      step={5}
       title={<>집 구할 때 절대 포기 못 하는 3가지는?</>}
       subtitle="꼼꼼하게 분석해서 실속 있는 정보만 모아 보여드릴게요"
       onNext={handleNext}

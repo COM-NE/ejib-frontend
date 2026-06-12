@@ -21,6 +21,7 @@ export type RequirementType =
 
 /** 회원가입 중인 사용자 데이터 */
 export interface OnboardingData {
+  name: string;
   nickname: string;
   profileImage: ProfileImageType | null;
   userStatus: UserStatusType | null;

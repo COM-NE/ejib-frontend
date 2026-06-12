@@ -9,6 +9,7 @@ import ProtectedLayout from "./layouts/protected-layout";
 
 import LoginPage from "./pages/login-page";
 import KakaoSuccessPage from "./pages/kakao-success-page";
+import NamePage from "./pages/onboarding/name-page";
 import NicknamePage from "./pages/onboarding/nickname-page";
 import ProfilePage from "./pages/onboarding/profile-page";
 import StatusPage from "./pages/onboarding/status-page";
@@ -52,6 +53,7 @@ const registerRoutes: RouteObject[] = [
     path: "/register",
     element: <ProtectedLayout />,
     children: [
+      { path: "name", element: <NamePage /> },
       { path: "nickname", element: <NicknamePage /> },
       { path: "profile", element: <ProfilePage /> },
       { path: "status", element: <StatusPage /> },

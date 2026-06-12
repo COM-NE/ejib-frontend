@@ -43,7 +43,7 @@ export default function StatusPage() {
 
   return (
     <RegisterLayout
-      step={3}
+      step={4}
       title={<>지금 어떤 환경에서 집을 찾고 계신가요?</>}
       subtitle="선택하신 그룹에 맞춰 나만의 맞춤형 정보를 구성할게요"
       onNext={handleNext}
