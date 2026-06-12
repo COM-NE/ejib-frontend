@@ -23,7 +23,7 @@ type NavItem = {
 const navItems: NavItem[] = [
   {
     label: "홈",
-    path: "/",
+    path: "/home",
     Icon: HomeIcon,
   },
   {
