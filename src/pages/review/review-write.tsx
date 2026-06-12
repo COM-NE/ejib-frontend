@@ -174,7 +174,7 @@ export default function ReviewWritePage() {
 
   const handleModalConfirm = () => {
     resetReview();
-    navigate("/");
+    navigate("home");
   };
 
   return (
@@ -235,10 +235,10 @@ export default function ReviewWritePage() {
               이집의 전체후기를 자세히 남겨주세요
             </p>
             <span className="text-xs text-[#ababab]">
-              <span className={detailedReview.length >= 10 ? "text-[#5060FE]" : ""}>
+              <span className={detailedReview.length >= 100 ? "text-[#5060FE]" : ""}>
                 {detailedReview.length}
               </span>
-              /10
+              /100
             </span>
           </div>
           <textarea
