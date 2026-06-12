@@ -55,7 +55,7 @@ export default function KakaoSuccessPage() {
           return;
         }
 
-        navigate("/", { replace: true });
+        navigate("/home", { replace: true });
       } catch (error) {
         console.error("[카카오 토큰 발급 실패]", error);
         alert("로그인 처리 중 오류가 발생했습니다.");
