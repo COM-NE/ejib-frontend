@@ -5,7 +5,7 @@ import BottomNavigation from "../components/NavigationBar";
 import Dropdown from "../components/common/Dropdown";
 import BottomButton from "../components/common/BottomButton";
 import AiLoadingPage from "./ai-loading-page";
-import { getAiRecommendation } from "../api/aiApi";
+// import { getAiRecommendation } from "../api/aiApi";
 
 const REGION_DATA: Record<string, string[]> = {
   서울특별시: [
@@ -71,7 +71,23 @@ export default function AiPage() {
     if (!isFormValid) return;
     setIsLoading(true);
 
+    // AI 추천 결과 목업 데이터
+    const MOCK_RESULT = {
+      propertyId: 1,
+      propertyName: "관악산 뜨란채 아파트",
+      address: "서울특별시 관악구 신림동 1735",
+      latitude: 37.4715,
+      longitude: 126.9232,
+      averageScore: 4.5,
+      reviewCount: 128,
+      aiSummary: "이 매물은 조용하고 쾌적한 주거 환경을 자랑합니다. 관악산 인근에 위치하여 공기가 맑으며, 단지 내 편의시설이 잘 갖춰져 있어 생활이 편리합니다. 특히 채광이 좋고 방음이 잘 된다는 입주민들의 긍정적인 평가가 많습니다.",
+    };
+
     try {
+      // 로딩 화면
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      /* 기존 API 연결 코드 (주석 처리)
       const region = `${region1} ${region2}`;
       console.log("[AiPage] 추천 요청 시작:", { region, userRequest: requirements });
       const result = await getAiRecommendation({
@@ -79,18 +95,21 @@ export default function AiPage() {
         userRequest: requirements,
       });
       console.log("[AiPage] 추천 요청 성공. 결과 데이터:", result);
-      
+
       if (!result || (typeof result === "object" && Object.keys(result).length === 0)) {
         console.warn("[AiPage] 유효한 결과 데이터가 없습니다.");
         alert("조건에 맞는 추천 매물을 찾지 못했습니다. 조건을 조금 다르게 입력해보세요.");
         setIsLoading(false);
         return;
       }
-
       navigate("/ai/result", { state: { result } });
+      */
+
+      // 목업 데이터로 이동
+      navigate("/ai/result", { state: { result: MOCK_RESULT } });
     } catch (error) {
-      console.error("AI 추천 요청 실패:", error);
-      alert("AI 추천을 가져오는 데 실패했습니다. 다시 시도해주세요.");
+      console.error("AI 추천 과정 중 오류 발생:", error);
+      navigate("/ai/result", { state: { result: MOCK_RESULT } });
     } finally {
       setIsLoading(false);
     }
