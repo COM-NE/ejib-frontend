@@ -24,31 +24,32 @@ const reviews: Review[] = [
   {
     id: 1,
     image:
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267d?w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800&auto=format&fit=crop",
     roomType: "일반 원룸",
-    title: "가톨릭대까지 160m",
+    title: "국민대까지 180m",
     location: "서울 성북구 정릉동",
     content:
-      "학교랑 가까워서 통학이 편했고, 주변이 조용해서 생활하기 좋았어요.",
+      "학교와 가까워서 아침 수업이 있어도 부담이 적었고, 주변이 조용해서 생활하기 좋았어요.",
   },
   {
     id: 2,
     image:
       "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&auto=format&fit=crop",
-    roomType: "일반 원룸",
-    title: "가톨릭대까지 200m",
-    location: "서울 성북구 길음동",
-    content: "건물 입구가 깨끗하고 CCTV가 있어서 혼자 살기에도 안심됐어요.",
+    roomType: "분리형 원룸",
+    title: "성신여대까지 250m",
+    location: "서울 성북구 동선동",
+    content:
+      "역과 학교가 모두 가까워 이동이 편했고, 건물 입구가 깔끔해서 혼자 살기에도 괜찮았어요.",
   },
   {
     id: 3,
     image:
       "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&auto=format&fit=crop",
-    roomType: "일반 원룸",
-    title: "역이 가까워서 이동하기 정말 편했어요",
-    location: "서울 강북구 미아동",
+    roomType: "오피스텔",
+    title: "고려대까지 320m",
+    location: "서울 성북구 안암동",
     content:
-      "주변에 편의점이랑 식당이 많아서 자취 처음 하는 사람에게도 괜찮아요.",
+      "주변에 편의점과 식당이 많아서 생활하기 편했고, 통학 거리도 가까워 만족스러웠어요.",
   },
 ];
 
