@@ -89,7 +89,7 @@ export default function RequirementPage() {
 
       if (completed) {
         resetOnboarding();
-        navigate("/");
+        navigate("/home");
       }
     } catch (err) {
       console.error(err);
