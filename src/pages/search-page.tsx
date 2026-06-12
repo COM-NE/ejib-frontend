@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { searchProperties } from "../api/property";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { searchProperties, togglePropertyScrap } from "../api/property";
 import SearchBar from "../components/common/SearchBar";
 import BottomNavigation from "../components/NavigationBar";
 import starIcon from "../assets/star.svg";
@@ -21,6 +21,9 @@ export type Property = {
 
 export default function SearchPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const keywordFromUrl = searchParams.get("keyword") ?? "";
 
   const [keyword, setKeyword] = useState("");
   const [error, setError] = useState("");
@@ -28,8 +31,8 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = async () => {
-    const trimmedKeyword = keyword.trim();
+  const fetchProperties = useCallback(async (searchKeyword: string) => {
+    const trimmedKeyword = searchKeyword.trim();
 
     if (!trimmedKeyword) return;
 
@@ -54,16 +57,61 @@ export default function SearchPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleLikeClick = (propertyId: number) => {
-    setProperties((prev) =>
-      prev.map((property) =>
-        property.id === propertyId
-          ? { ...property, isLiked: !property.isLiked }
-          : property,
-      ),
+  useEffect(() => {
+    const trimmedKeyword = keywordFromUrl.trim();
+
+    if (!trimmedKeyword) return;
+
+    setKeyword(trimmedKeyword);
+    fetchProperties(trimmedKeyword);
+  }, [keywordFromUrl, fetchProperties]);
+
+  const handleLikeClick = async (propertyId: number) => {
+    const targetProperty = properties.find(
+      (property) => property.id === propertyId,
     );
+
+    if (!targetProperty) return;
+
+    const previousLiked = targetProperty.isLiked;
+
+    try {
+      // 먼저 화면에서 바로 바뀌게 처리
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? { ...property, isLiked: !property.isLiked }
+            : property,
+        ),
+      );
+
+      // 서버에 찜 상태 변경 요청
+      const scrapped = await togglePropertyScrap(propertyId);
+
+      // 서버 응답 기준으로 최종 반영
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? { ...property, isLiked: scrapped }
+            : property,
+        ),
+      );
+    } catch (err) {
+      console.error(err);
+
+      // 실패하면 원래 상태로 되돌림
+      setProperties((prev) =>
+        prev.map((property) =>
+          property.id === propertyId
+            ? { ...property, isLiked: previousLiked }
+            : property,
+        ),
+      );
+
+      alert("찜 상태 변경에 실패했습니다.");
+    }
   };
 
   return (
@@ -72,7 +120,13 @@ export default function SearchPage() {
         <SearchBar
           value={keyword}
           onChange={setKeyword}
-          onSubmit={handleSearch}
+          onSubmit={() => {
+            const trimmedKeyword = keyword.trim();
+
+            if (!trimmedKeyword) return;
+
+            setSearchParams({ keyword: trimmedKeyword });
+          }}
         />
       </header>
 
