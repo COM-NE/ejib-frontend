@@ -64,3 +64,13 @@ export const postKakaoTokens = async (
     onboardingCompleted,
   };
 };
+
+export interface LogoutRequest {
+  refreshToken: string;
+}
+
+export const postLogout = async (refreshToken: string): Promise<void> => {
+  await axiosInstance.post("/api/v1/auth/logout", {
+    refreshToken,
+  });
+};

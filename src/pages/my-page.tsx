@@ -4,6 +4,7 @@ import BottomNavigation from "../components/NavigationBar";
 import zibiYellow from "../assets/onboarding/zibi-yellow.png";
 import { useReviewStore } from "../store/reviewStore";
 import { getMyProfile, type MyProfile } from "../api/user";
+import { postLogout } from "../api/authApi";
 
 const myActivities = [
   {
@@ -49,13 +50,25 @@ export default function MyPage() {
     fetchMyProfile();
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("review-storage");
-    resetReview();
-    console.log("logout");
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    const refreshToken = localStorage.getItem("refreshToken");
+
+    try {
+      if (refreshToken) {
+        await postLogout(refreshToken);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("서버 로그아웃 요청에 실패했습니다.");
+    } finally {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("review-storage");
+
+      resetReview();
+
+      window.location.href = "/login";
+    }
   };
 
   if (loading) {
