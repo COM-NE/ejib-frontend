@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import RegisterLayout from "../../layouts/register-layout";
 import { useOnboardingStore } from "../../store/onboardingStore";
 
-export default function NicknamePage() {
+export default function NamePage() {
   const navigate = useNavigate();
-  const nickname = useOnboardingStore((state) => state.nickname);
-  const setNickname = useOnboardingStore((state) => state.setNickname);
+  const name = useOnboardingStore((state) => state.name);
+  const setName = useOnboardingStore((state) => state.setName);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -18,33 +18,33 @@ export default function NicknamePage() {
     };
   }, []);
 
-  const nicknameIsValid = nickname.trim().length > 0;
+  const nameIsValid = name.trim().length > 0;
 
   const handleNext = () => {
     setHasSubmitted(true);
-    if (!nicknameIsValid) return;
+    if (!nameIsValid) return;
 
-    setNickname(nickname.trim());
+    setName(name.trim());
     navigate("/register/profile");
   };
 
   return (
     <RegisterLayout
-      step={2}
+      step={1}
       title={<>반가워요! 당신의 프로필을 완성해주세요</>}
-      subtitle="이집어때에서 사용할 닉네임을 알려주세요"
+      subtitle="실제 이름(이름)을 입력해주세요"
       onNext={handleNext}
       buttonContext="다음"
-      disabled={!nicknameIsValid}
+      disabled={!nameIsValid}
     >
       <div className="mt-10">
         <input
-          id="nickname"
-          value={nickname}
-          onChange={(event) => setNickname(event.target.value)}
+          id="name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder="닉네임을 입력해주세요"
+          placeholder="이름을 입력해주세요"
           maxLength={10}
           className={`
             w-full rounded-[16px] border px-4 py-4
@@ -61,15 +61,15 @@ export default function NicknamePage() {
 
         <div className="mt-2 flex items-center justify-between">
           <div>
-            {hasSubmitted && !nicknameIsValid ? (
+            {hasSubmitted && !nameIsValid ? (
               <p className="font-[PretendardVariable] text-sm text-[#E05F5F]">
-                닉네임을 입력해야 다음으로 넘어갈 수 있어요.
+                이름을 입력해야 다음으로 넘어갈 수 있어요.
               </p>
             ) : null}
           </div>
 
           <p className="font-[PretendardVariable] text-sm font-medium text-[#AEB3B9]">
-            {nickname.length}/10
+            {name.length}/10
           </p>
         </div>
       </div>
