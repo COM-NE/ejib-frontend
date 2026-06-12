@@ -25,14 +25,14 @@ export default function NamePage() {
     if (!nameIsValid) return;
 
     setName(name.trim());
-    navigate("/register/profile");
+    navigate("/register/nickname");
   };
 
   return (
     <RegisterLayout
       step={1}
       title={<>반가워요! 당신의 프로필을 완성해주세요</>}
-      subtitle="실제 이름(이름)을 입력해주세요"
+      subtitle="실제 이름을 입력해주세요"
       onNext={handleNext}
       buttonContext="다음"
       disabled={!nameIsValid}
