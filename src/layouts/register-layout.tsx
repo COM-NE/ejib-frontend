@@ -19,7 +19,7 @@ const RegisterLayout = ({
   onNext,
   disabled = false,
 }: RegisterLayoutProps) => {
-  const progress = (step / 4) * 100;
+  const progress = (step / 5) * 100;
 
   return (
     <div className="flex min-h-screen flex-col">
