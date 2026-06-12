@@ -11,21 +11,43 @@ export interface KakaoTokenResponse {
   onboardingCompleted: boolean;
 }
 
+type KakaoTokenRawPayload = {
+  accessToken?: string;
+  access_token?: string;
+  access?: string;
+
+  refreshToken?: string;
+  refresh_token?: string;
+  refresh?: string;
+
+  newUser?: boolean;
+  new_user?: boolean;
+  isNewUser?: boolean;
+
+  onboardingCompleted?: boolean;
+  onboarding_completed?: boolean;
+
+  result?: KakaoTokenRawPayload;
+};
+
 export const postKakaoTokens = async (
   ticket: string,
 ): Promise<KakaoTokenResponse> => {
-  const response = await axiosInstance.post("/api/v1/auth/kakao/tokens", {
-    ticket,
-  });
+  const response = await axiosInstance.post<KakaoTokenRawPayload>(
+    "/api/v1/auth/kakao/tokens",
+    {
+      ticket,
+    },
+  );
 
   console.log("[카카오 토큰 원본 응답]", response.data);
 
-  // Normalize backend response shape. Some backends nest under `result` or use snake_case.
-  const payload = response.data ?? {};
-  const result = (payload.result as any) ?? payload;
+  const payload: KakaoTokenRawPayload = response.data ?? {};
+  const result = payload.result ?? payload;
 
   const accessToken =
     result.accessToken ?? result.access_token ?? result.access ?? "";
+
   const refreshToken =
     result.refreshToken ?? result.refresh_token ?? result.refresh ?? "";
 
@@ -40,5 +62,5 @@ export const postKakaoTokens = async (
     refreshToken,
     newUser,
     onboardingCompleted,
-  } as KakaoTokenResponse;
+  };
 };
