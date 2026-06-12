@@ -31,8 +31,8 @@ const publicRoutes: RouteObject[] = [
     path: "/",
     element: <PublicLayout />,
     children: [
-      { index: true, element: <HomePage /> },
-      { path: "login", element: <LoginPage /> },
+      { index: true, element: <LoginPage /> },
+      { path: "home", element: <HomePage /> },
       { path: "/oauth/kakao/success", element: <KakaoSuccessPage /> },
       { path: "search", element: <SearchPage /> },
       { path: "/properties/:propertyId", element: <DetailPage /> },
